@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:org.librarysimplified.bookmarks:locator:1.0",
+  "title": "Simplified Bookmark Locator",
+  "description": "A bookmark locator",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorHrefProgression"
+        },
+        "href": {
+          "description": "The unique identifier for a chapter (hpChapterHref)",
+          "type": "string"
+        },
+        "progressWithinChapter": {
+          "description": "The progress within a chapter (hpChapterProgression)",
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "required": [
+        "href",
+        "progressWithinChapter",
+        "@type"
+      ]
+    },
+
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorLegacyCFI"
+        },
+        "idref": {
+          "description": "The unique identifier for a chapter (lcIdRef)",
+          "type": "string"
+        },
+        "contentCFI": {
+          "description": "The content fragment identifier (lcContentCFI)",
+          "type": "string"
+        },
+        "progressWithinChapter": {
+          "description": "The progress within a chapter (lcChapterProgression)",
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "required": [
+        "@type"
+      ]
+    }
+  ]
+}
