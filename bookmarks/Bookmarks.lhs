@@ -74,6 +74,7 @@ A _Locator_ is one of the following:
 
   * [LocatorLegacyCFI](#locatorlegacycfi)
   * [LocatorHrefProgression](#locatorhrefprogression)
+  * [LocatorAudioBookTime](#locatoraudiobooktime)
 
 ```haskell
 data Locator
@@ -184,6 +185,18 @@ data Chapter
   = Chapter Integer
   deriving (Eq, Ord, Show)
 
+data Title
+  = Title String
+  deriving (Eq, Ord, Show)
+
+data AudiobookID
+  = AudiobookID String
+  deriving (Eq, Ord, Show)
+
+data Duration
+  = Duration Integer
+  deriving (Eq, Ord, Show)
+
 data TimeMilliseconds
   = TimeMilliseconds Integer
   deriving (Eq, Ord, Show)
@@ -200,6 +213,12 @@ chapter x =
   then Chapter x
   else error "Chapter must be in non-negative"
 
+duration :: Integer -> Duration
+duration x =
+  if (x >= 0)
+  then Duration x
+  else error "Duration must be in non-negative"
+
 time :: Integer -> TimeMilliseconds
 time x =
   if (x >= 0)
@@ -207,9 +226,12 @@ time x =
   else error "TimeMilliseconds must be in non-negative"
 
 data LocatorAudioBookTime = LocatorAudioBookTime {
-  abtPart    :: Part,
-  abtChapter :: Chapter,
-  abtTime    :: TimeMilliseconds
+  abtPart		:: Part,
+  abtChapter		:: Chapter,
+  abtTitle		:: Title,
+  abtAudiobookID	:: AudiobookID,
+  abtDuration 	 	:: Duration,
+  abtTime     	 	:: TimeMilliseconds
 } deriving (Eq, Ord, Show)
 ```
 
@@ -364,6 +386,19 @@ Locators _MUST_ be serialized using the following [JSON schema](locatorSchema.js
           "type": "number",
           "minimum": 0
         },
+        "title": {
+          "description": "The title (abtTitle)",
+          "type": "string"
+        },
+        "audiobookID": {
+          "description": "The audiobook ID (abtAudiobookID)",
+          "type": "string"
+        },
+        "duration": {
+          "description": "The duration (abtDuration)",
+          "type": "number",
+          "minimum": 0
+        }
         "time": {
           "description": "The time (abtTime)",
           "type": "number",
@@ -374,6 +409,9 @@ Locators _MUST_ be serialized using the following [JSON schema](locatorSchema.js
         "@type",
         "part",
         "chapter",
+		"title",
+		"audiobookID",
+		"duration",
         "time"
       ]
     }
@@ -435,6 +473,9 @@ An example of a valid, serialized locator is given in [valid-locator-3.json](val
   "@type": "LocatorAudioBookTime",
   "part": 3,
   "chapter": 32,
+  "title": "Chapter title",
+  "audiobookID": "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+  "duration": 190000,
   "time": 78000
 }
 ```
@@ -613,10 +654,12 @@ their required interpretation is listed below.
 |[invalid-locator-2.json](invalid-locator-2.json)|locator|❌ failure|Missing progressWithinChapter property|
 |[invalid-locator-3.json](invalid-locator-3.json)|locator|❌ failure|Chapter progression is negative|
 |[invalid-locator-4.json](invalid-locator-4.json)|locator|❌ failure|Chapter progression is greater than 1.0|
+|[invalid-locator-5.json](invalid-locator-5.json)|locator|❌ failure|Chapter number is negative|
 |[valid-bookmark-0.json](valid-bookmark-0.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-1.json](valid-bookmark-1.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-2.json](valid-bookmark-2.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-3.json](valid-bookmark-3.json)|bookmark|✅ success|Valid bookmark|
+|[valid-bookmark-4.json](valid-bookmark-3.json)|bookmark|✅ success|Valid bookmark|
 |[valid-locator-0.json](valid-locator-0.json)|locator|✅ success|Valid locator|
 |[valid-locator-1.json](valid-locator-1.json)|locator|✅ success|Valid locator|
 |[valid-locator-2.json](valid-locator-2.json)|locator|✅ success|Valid locator|
