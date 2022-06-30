@@ -226,12 +226,12 @@ time x =
   else error "TimeMilliseconds must be in non-negative"
 
 data LocatorAudioBookTime = LocatorAudioBookTime {
-  abtPart     	 :: Part,
-  abtChapter  	 :: Chapter,
-  abtTitle	  	 :: Title,
-  abtAudiobookID :: AudiobookID,
-  abtDuration 	 :: Duration,
-  abtTime     	 :: TimeMilliseconds
+  abtPart			:: Part,
+  abtChapter		:: Chapter,
+  abtTitle			:: Title,
+  abtAudiobookID	:: AudiobookID,
+  abtDuration 	 	:: Duration,
+  abtTime     	 	:: TimeMilliseconds
 } deriving (Eq, Ord, Show)
 ```
 
