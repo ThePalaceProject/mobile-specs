@@ -57,6 +57,50 @@
       "required": [
         "@type"
       ]
+    },
+
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorAudioBookTime"
+        },
+        "chapter": {
+          "description": "The number of the chapter (abtChapter)",
+          "type": "number"
+        },
+        "part": {
+          "description": "The number of the part where the chapter belongs to (abtPart)",
+          "type": "number"
+        },
+        "time": {
+          "description": "The offset of the locator (abtTime)",
+          "type": "number"
+        },
+        "title": {
+          "description": "The title of the chapter (abtTitle)",
+          "type": "string"
+        },
+        "audiobookID": {
+          "description": "The unique identifier of the audiobook (abtAudiobookID)",
+          "type": "string"
+        },
+        "duration": {
+          "description": "The duration of the chapter (abtDuration)",
+          "type": "number"
+        },
+      },
+      "required": [
+        "@type",
+		"chapter",
+		"part",
+		"time",
+		"title",
+		"audiobookID",
+		"duration"
+      ]
     }
   ]
 }
