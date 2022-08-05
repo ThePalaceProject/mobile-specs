@@ -5,17 +5,21 @@ invalid-bookmark-3.json:bookmark:failure:Target selector has an invalid type
 invalid-bookmark-4.json:bookmark:failure:Target selector has an invalid value
 invalid-bookmark-5.json:bookmark:failure:Body lacks device ID property
 invalid-bookmark-6.json:bookmark:failure:Body lacks time property
+invalid-bookmark-7.json:bookmark:failure:Target selector lacks page
 invalid-locator-1.json:locator:failure:Missing idref property
 invalid-locator-2.json:locator:failure:Missing progressWithinChapter property
 invalid-locator-3.json:locator:failure:Chapter progression is negative
 invalid-locator-4.json:locator:failure:Chapter progression is greater than 1.0
 invalid-locator-5.json:locator:failure:Chapter number is negative
+invalid-locator-6.json:locator:failure:Page number is negative
 valid-bookmark-0.json:bookmark:success:Valid bookmark
 valid-bookmark-1.json:bookmark:success:Valid bookmark
 valid-bookmark-2.json:bookmark:success:Valid bookmark
 valid-bookmark-3.json:bookmark:success:Valid bookmark
 valid-bookmark-4.json:bookmark:success:Valid bookmark
+valid-bookmark-5.json:bookmark:success:Valid bookmark
 valid-locator-0.json:locator:success:Valid locator
 valid-locator-1.json:locator:success:Valid locator
 valid-locator-2.json:locator:success:Valid locator
 valid-locator-3.json:locator:success:Valid locator
+valid-locator-4.json:locator:success:Valid locator

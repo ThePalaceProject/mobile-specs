@@ -74,6 +74,7 @@ A _Locator_ is one of the following:
 
   * [LocatorLegacyCFI](#locatorlegacycfi)
   * [LocatorHrefProgression](#locatorhrefprogression)
+  * [LocatorPage](#locatorpage)
   * [LocatorAudioBookTime](#locatoraudiobooktime)
 
 ```haskell
@@ -650,16 +651,19 @@ their required interpretation is listed below.
 |[invalid-bookmark-4.json](invalid-bookmark-4.json)|bookmark|❌ failure|Target selector has an invalid value|
 |[invalid-bookmark-5.json](invalid-bookmark-5.json)|bookmark|❌ failure|Body lacks device ID property|
 |[invalid-bookmark-6.json](invalid-bookmark-6.json)|bookmark|❌ failure|Body lacks time property|
+|[invalid-bookmark-7.json](invalid-bookmark-7.json)|bookmark|❌ failure|Target selector lacks page|
 |[invalid-locator-1.json](invalid-locator-1.json)|locator|❌ failure|Missing href property|
 |[invalid-locator-2.json](invalid-locator-2.json)|locator|❌ failure|Missing progressWithinChapter property|
 |[invalid-locator-3.json](invalid-locator-3.json)|locator|❌ failure|Chapter progression is negative|
 |[invalid-locator-4.json](invalid-locator-4.json)|locator|❌ failure|Chapter progression is greater than 1.0|
 |[invalid-locator-5.json](invalid-locator-5.json)|locator|❌ failure|Chapter number is negative|
+|[invalid-locator-6.json](invalid-locator-6.json)|locator|❌ failure|Page number is negative|
 |[valid-bookmark-0.json](valid-bookmark-0.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-1.json](valid-bookmark-1.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-2.json](valid-bookmark-2.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-3.json](valid-bookmark-3.json)|bookmark|✅ success|Valid bookmark|
-|[valid-bookmark-4.json](valid-bookmark-3.json)|bookmark|✅ success|Valid bookmark|
+|[valid-bookmark-4.json](valid-bookmark-4.json)|bookmark|✅ success|Valid bookmark|
+|[valid-bookmark-5.json](valid-bookmark-5.json)|bookmark|✅ success|Valid bookmark|
 |[valid-locator-0.json](valid-locator-0.json)|locator|✅ success|Valid locator|
 |[valid-locator-1.json](valid-locator-1.json)|locator|✅ success|Valid locator|
 |[valid-locator-2.json](valid-locator-2.json)|locator|✅ success|Valid locator|
@@ -753,6 +757,52 @@ validBookmark3 = Bookmark {
 }
 ```
 
+### valid-bookmark-4.json
+
+```haskell
+validBookmark4 :: Bookmark
+validBookmark4 = Bookmark {
+  bookmarkId   = Just "urn:uuid:715885bc-23d3-4d7d-bd87-f5e7a042c4ba",
+  bookmarkBody = BookmarkBody {
+	bodyChapter	 = "Chapter title",
+    bodyDeviceId = "urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c",
+    bodyTime     = "2022-06-27T12:47:49Z"
+  },
+  bookmarkMotivation = Bookmarking,
+  bookmarkTarget = BookmarkTarget {
+    targetLocator = L_ABT $ LocatorAudioBookTime {
+      hpTitle	           = "Chapter title",
+      hpAudiobookID		   = "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+      hpChapter	           = chapter 32,
+      hpDuration	       = duration 190000,
+      hpTime	           = time 78000,
+      hpPart	           = part 3
+    },
+    targetSource = "urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0"
+  }
+}
+```
+
+### valid-bookmark-5.json
+
+```haskell
+validBookmark5 :: Bookmark
+validBookmark5 = Bookmark {
+  bookmarkId   = Just "urn:uuid:715885bc-23d3-4d7d-bd87-f5e7a042c4ba",
+  bookmarkBody = BookmarkBody {
+    bodyDeviceId = "urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c",
+    bodyTime     = "2022-08-05T16:32:49Z"
+  },
+  bookmarkMotivation = Bookmarking,
+  bookmarkTarget = BookmarkTarget {
+    targetLocator = L_P $ LocatorPage {
+      hpPage	           = page 2
+    },
+    targetSource = "urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0"
+  }
+}
+```
+
 ### valid-locator-0.json
 
 ```haskell
@@ -771,5 +821,28 @@ validLocator1 = L_CFI $ LocatorLegacyCFI {
   lcIdRef              = Just "xyz-html",
   lcContentCFI         = Just "/4/2/2/2",
   lcChapterProgression = Just $ progression 0.25
+}
+```
+
+### valid-locator-2.json
+
+```haskell
+validLocator2 :: Locator
+validLocator2 = L_P $ LocatorPage {
+  lcPage			   = Just $ page 2
+}
+```
+
+### valid-locator-3.json
+
+```haskell
+validLocator3 :: Locator
+validLocator3 = L_ABT$ LocatorAudioBookTime {
+  lcPart               = Just $ part 3,
+  lcChapter 		   = Just $ chapter 32,
+  lcTitle			   = Just "Chapter title",
+  lcAudiobookID		   = Just "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+  lcDuration		   = Just $ duration 190000,
+  lcTime			   = Just $ time 78000
 }
 ```
