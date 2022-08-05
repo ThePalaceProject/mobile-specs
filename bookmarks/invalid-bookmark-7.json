@@ -10,7 +10,7 @@
   "target": {
     "selector": {
       "type": "oa:FragmentSelector",
-      "value": "{\n  \"@type\": \"LocatorPage\",\n}\n"
+      "value": "{\n  \"@type\": \"LocatorPage\"\n}\n"
     },
     "source": "urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0"
   }
