@@ -5,13 +5,13 @@ audiobook-reading-order-ids
 
 We consume audiobooks from lots of different distributors. Each audiobook comes with a _manifest_
 that describes the chapters within the book and may contain links to the audio files that make
-up each chapter. Manifests come in a wide variety of different formats, and our audiobook APIs 
-effectively abstract over the different formats in order to provide a uniform API to our 
+up each chapter. Manifests come in a wide variety of different formats, and our audiobook APIs
+effectively abstract over the different formats in order to provide a uniform API to our
 applications.
 
 One aspect that all manifest formats have in common is that they provide a list of
 _reading order items_. These are the distinct, unique objects that make up the actual audio of
-the book. The basic intuition is that, if you were to place all of the reading order items 
+the book. The basic intuition is that, if you were to place all of the reading order items
 end-to-end and combine them into a single audio file, you would get the entire audio of the book
 in the order in which it is intended to be heard.
 
@@ -57,7 +57,8 @@ For reasons of sanity, identifiers must be of a non-zero length.
 ## Generation
 
 The following sections describe the rules that should be used to generate identifiers for different
-types of manifests. Applications should try each rule in turn, falling back to the [Fallback](#fallback)
+types of manifests. Applications should try each rule in turn, falling back to
+the [Fallback](#fallback)
 rule if none of the preceding rules apply.
 
 ### WebPub Manifests
@@ -67,13 +68,8 @@ contain a `readingOrder` array where each object in the array contains a `href` 
 is expected to be unique within that `readingOrder` array.
 
 If the object does _not_ also contain a `templated` property, then the reading order identifier
-should be equal to the value of the `href` property. The reason for avoiding the use of `href`
-values that are marked as `templated` is that, in the presence of URI templating, the values of
-the `href` field may not actually be unique: It's permitted (although unusual and obscure) for
-every `templated` `href` value to be the same, and for each reading order item to contain a
-`properties` object containing values to be substituted into the `href` in order to produce a
-unique URI. This is a level of complexity that we currently do not want to mandate that players
-handle correctly, due to the apparent almost nonexistent use of `templated` links.
+should be equal to the value of the `href` property. If `readingOrder` links are encountered that
+have `templated` properties, the manifest should be rejected with a clear error message.
 
 ### Findaway
 
@@ -91,8 +87,8 @@ The identifier that applications should generate for a reading order item with
 urn:org.thepalaceproject:findaway:p:s
 ```
 
-Newer manifests _may_ include `href` values. If the manifest does contain a non-`templated` 
-`href` value, that value should be used in favour of this generation scheme (as, in that case, 
+Newer manifests _may_ include `href` values. If the manifest does contain a non-`templated`
+`href` value, that value should be used in favour of this generation scheme (as, in that case,
 the manifest is essentially a valid [WebPub manifest](#webpub-manifests)).
 
 ### Overdrive
@@ -114,7 +110,7 @@ Manifests from Overdrive are in a completely proprietary JSON format. The manife
  },
 ```
 
-Each `href` property inside each `contentlinks` element has a value that is a URI that has a 
+Each `href` property inside each `contentlinks` element has a value that is a URI that has a
 short expiration date. Therefore, the values of these `href` properties are not _stable_ and
 therefore cannot be used to derive stable identifiers. As none of the other properties within
 the `contentlinks` elements will uniquely identify that element, the only option applications
@@ -131,7 +127,7 @@ generating identifiers based on an integer index into an array of reading order 
 a reading order item index `i`, starting at `0`, the identifier generated must be:
 
 ```
-urn:org.thepalaceproject:reading_order_item:i
+urn:org.thepalaceproject:readingOrder:i
 ```
 
 In pseudocode:
@@ -141,7 +137,7 @@ x : Array[ReadingOrderItem]
 o : Array[Identifier]
 
 for i in 0 .. (length x)
-  o[i] = Identifier("urn:org.thepalaceproject:reading_order_item:i")
+  o[i] = Identifier("urn:org.thepalaceproject:readingOrder:i")
 ```
 
 ## Examples
@@ -200,8 +196,8 @@ Given the following `readingOrder` taken from a [WebPub manifest](#webpub-manife
 }
 ```
 
-The application must generate the identifier `urn:org.thepalaceproject:reading_order_item:0` for 
-the first item and `urn:org.thepalaceproject:reading_order_item:1` for the second. This is due to the
+The application must generate the identifier `urn:org.thepalaceproject:readingOrder:0` for
+the first item and `urn:org.thepalaceproject:readingOrder:1` for the second. This is due to the
 use of `templated` URIs.
 
 ### Findaway
@@ -253,5 +249,5 @@ Given the following Overdrive manifest:
 }
 ```
 
-The application must generate the identifier `urn:org.thepalaceproject:reading_order_item:0` for
-the first item and `urn:org.thepalaceproject:reading_order_item:1` for the second.
+The application must generate the identifier `urn:org.thepalaceproject:readingOrder:0` for
+the first item and `urn:org.thepalaceproject:readingOrder:1` for the second.
