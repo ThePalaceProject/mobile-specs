@@ -303,7 +303,147 @@ throw ErrorNoSuchChapter();
 Locators _MUST_ be serialized using the following [JSON schema](locatorSchema.json):
 
 ```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:org.thepalaceproject.bookmarks:locator:2.0",
+  "title": "Palace Bookmark Locator",
+  "description": "A bookmark locator",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorHrefProgression"
+        },
+        "href": {
+          "description": "The unique identifier for a chapter (hpChapterHref)",
+          "type": "string"
+        },
+        "progressWithinChapter": {
+          "description": "The progress within a chapter (hpChapterProgression)",
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "required": [
+        "href",
+        "progressWithinChapter",
+        "@type"
+      ]
+    },
 
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorLegacyCFI"
+        },
+        "idref": {
+          "description": "The unique identifier for a chapter (lcIdRef)",
+          "type": "string"
+        },
+        "contentCFI": {
+          "description": "The content fragment identifier (lcContentCFI)",
+          "type": "string"
+        },
+        "progressWithinChapter": {
+          "description": "The progress within a chapter (lcChapterProgression)",
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "required": [
+        "@type"
+      ]
+    },
+
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorAudioBookTime"
+        },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "const": 1
+        },
+        "chapter": {
+          "description": "The number of the chapter (abtChapter)",
+          "type": "number"
+        },
+        "part": {
+          "description": "The number of the part where the chapter belongs to (abtPart)",
+          "type": "number"
+        },
+        "time": {
+          "description": "The offset of the locator (abtTime)",
+          "type": "number"
+        },
+        "title": {
+          "description": "The title of the chapter (abtTitle)",
+          "type": "string"
+        },
+        "audiobookID": {
+          "description": "The unique identifier of the audiobook (abtAudiobookID)",
+          "type": "string"
+        },
+        "duration": {
+          "description": "The duration of the chapter (abtDuration)",
+          "type": "number"
+        }
+      },
+      "required": [
+        "@type",
+		"chapter",
+		"part",
+		"time",
+		"title",
+		"audiobookID",
+		"duration"
+      ]
+    },
+
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorAudioBookTime"
+        },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "const": 2
+        },
+        "readingOrderItem": {
+          "description": "The reading order item within the book.",
+          "type": "string"
+        },
+        "readingOrderItemOffsetMilliseconds": {
+          "description": "The offset from the start of the reading order item within the book.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "@type",
+        "@version",
+        "readingOrderItem",
+        "readingOrderItemOffsetMilliseconds"
+      ]
+    }
+  ]
+}
 ```
 
 A [LocatorHrefProgression](#locatorhrefprogression) value MUST be serialized
@@ -316,7 +456,9 @@ A [LocatorPage](#locatorpage) value MUST be serialized using the
 schema with `@type = LocatorPage`.
 
 A [LocatorAudioBookTime](#locatoraudiobooktime) value MUST be serialized using the
-schema with `@type = LocatorAudioBookTime`.
+schema with `@type = LocatorAudioBookTime`. Note that the schema for `LocatorAudioBookTime`
+introduces versioning via a `@version` property. If the `@version` property is not present,
+the default should be assumed to be version `1`.
 
 When encountering a locator without a `@type` property, applications SHOULD
 assume that the format is `LocatorLegacyCFI` and parse it accordingly.
