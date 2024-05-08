@@ -1,10 +1,10 @@
-Simplified-Bookmarks-Spec
+Palace-Bookmarks-Spec
 ===
 
 ## Overview
 
 The contents of this repository define a specification describing the format
-of bookmark data shared between clients and server in the Library Simplified
+of bookmark data shared between clients and server in the Palace
 ecosystem. The intention is to declare a common format for bookmarks that
 clients on different platforms (Web, iOS, Android) can use to synchronize
 reading positions. The specification is described as executable Literate
@@ -56,12 +56,11 @@ of an _annotation_ with a set of strictly-defined required and optional fields.
 
 ## Compatibility
 
-Historically, the Library Simplified applications have not had a consistent
-standard with regard to how bookmarks are serialized. Applications MAY
-accept bookmarks in older formats, but MUST serialize all new bookmarks
-using the format described here. This allows for a degree of migration
-compatibility; over time, all bookmarks in circulation will effectively be
-converted to the new format.
+Historically, the Palace applications (in the days of being Library Simplified applications)
+have not had a consistent standard with regard to how bookmarks are serialized. Applications MAY
+accept bookmarks in older formats, but MUST serialize all new bookmarks using the format described
+here. This allows for a degree of migration compatibility; over time, all bookmarks in circulation
+will effectively be converted to the new format.
 
 ## Locators
 
@@ -171,9 +170,17 @@ data LocatorPage = LocatorPage {
 
 ### LocatorAudioBookTime
 
-A `LocatorAudioBookTime` consists of a _part_ and _chapter_ number, and a time
+A `LocatorAudioBookTime` value is either a `LocatorAudioBookTime1` value or a
+`LocatorAudioBookTime2` value.
+
+A `LocatorAudioBookTime1` value consists of a _part_ and _chapter_ number, and a time
 in milliseconds. This is expected to uniquely identify a position within an
 audio book.
+
+A `LocatorAudioBookTime2` value consists of a [reading order item ID](/audiobook-reading-order-ids/README.md)
+and a time in milliseconds.
+
+`LocatorAudioBookTime1` values are deprecated and should not be used for new bookmarks.
 
 `Part` and `Chapter` numbers must be non-negative, as must `TimeMilliseconds` values.
 
@@ -186,16 +193,8 @@ data Chapter
   = Chapter Integer
   deriving (Eq, Ord, Show)
 
-data Title
-  = Title String
-  deriving (Eq, Ord, Show)
-
 data AudiobookID
   = AudiobookID String
-  deriving (Eq, Ord, Show)
-
-data Duration
-  = Duration Integer
   deriving (Eq, Ord, Show)
 
 data TimeMilliseconds
@@ -214,36 +213,41 @@ chapter x =
   then Chapter x
   else error "Chapter must be in non-negative"
 
-duration :: Integer -> Duration
-duration x =
-  if (x >= 0)
-  then Duration x
-  else error "Duration must be in non-negative"
-
-startOffset :: Integer -> StartOffsetMilliseconds
-startOffset x =
-  if (x >= 0)
-  then StartOffsetMilliseconds x
-  else error "StartOffsetMilliseconds must be in non-negative"
-
 time :: Integer -> TimeMilliseconds
 time x =
   if (x >= 0)
   then TimeMilliseconds x
   else error "TimeMilliseconds must be in non-negative"
 
-data LocatorAudioBookTime = LocatorAudioBookTime {
-  abtPart		:: Part,
-  abtChapter		:: Chapter,
-  abtTitle		:: Title,
-  abtAudiobookID	:: AudiobookID,
-  abtDuration 	 	:: Duration,
-  abtStartOffset 	:: StartOffsetMilliseconds,
-  abtTime     	 	:: TimeMilliseconds
+data LocatorAudioBookTime1 = LocatorAudioBookTime1 {
+  abtPart        :: Part,
+  abtChapter     :: Chapter,
+  abtTitle       :: String,
+  abtAudiobookID :: AudiobookID,
+  abtDuration    :: TimeMilliseconds,
+  abtStartOffset :: TimeMilliseconds,
+  abtTime        :: TimeMilliseconds
 } deriving (Eq, Ord, Show)
+
+data LocatorAudioBookTime2 = LocatorAudioBookTime2 {
+  abtReadingOrderItem       :: String,
+  aptReadingOrderItemOffset :: TimeMilliseconds
+} deriving (Eq, Ord, Show)
+
+data LocatorAudioBookTime
+  = LABT1 LocatorAudioBookTime1
+  | LABT2 LocatorAudioBookTime2
+  deriving (Eq, Ord, Show)
 ```
 
 #### Interpretation
+
+##### LocatorAudioBookTime2
+
+The [reading order item ID](/audiobook-reading-order-ids/README.md) specification describes how
+the audio tracks that make up an audiobook are identified.
+
+##### LocatorAudioBookTime1
 
 Audiobook players differ in their support for `part` values. Some manifests will not contain `part` numbers,
 whilst other manifests are provided to players that actually require them in order to work at all. Manifests
@@ -299,141 +303,7 @@ throw ErrorNoSuchChapter();
 Locators _MUST_ be serialized using the following [JSON schema](locatorSchema.json):
 
 ```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:org.librarysimplified.bookmarks:locator:1.0",
-  "title": "Simplified Bookmark Locator",
-  "description": "A bookmark locator",
-  "type": "object",
-  "oneOf": [
-    {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "description": "The type of locator",
-          "type": "string",
-          "pattern": "LocatorHrefProgression"
-        },
-        "href": {
-          "description": "The unique identifier for a chapter (hpChapterHref)",
-          "type": "string"
-        },
-        "progressWithinChapter": {
-          "description": "The progress within a chapter (hpChapterProgression)",
-          "type": "number",
-          "minimum": 0.0,
-          "maximum": 1.0
-        }
-      },
-      "required": [
-        "@type",
-        "href",
-        "progressWithinChapter"
-      ]
-    },
 
-    {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "description": "The type of locator",
-          "type": "string",
-          "pattern": "LocatorLegacyCFI"
-        },
-        "idref": {
-          "description": "The unique identifier for a chapter (lcIdRef)",
-          "type": "string"
-        },
-        "contentCFI": {
-          "description": "The content fragment identifier (lcContentCFI)",
-          "type": "string"
-        },
-        "progressWithinChapter": {
-          "description": "The progress within a chapter (lcChapterProgression)",
-          "type": "number",
-          "minimum": 0.0,
-          "maximum": 1.0
-        }
-      },
-      "required": [
-        "@type"
-      ]
-    },
-
-    {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "description": "The type of locator",
-          "type": "string",
-          "pattern": "LocatorPage"
-        },
-        "page": {
-          "description": "The integer page number (ipPage)",
-          "type": "number",
-          "minimum": 0
-        }
-      },
-      "required": [
-        "@type",
-        "page"
-      ]
-    },
-
-    {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "description": "The type of locator",
-          "type": "string",
-          "pattern": "LocatorAudioBookTime"
-        },
-        "part": {
-          "description": "The part number (abtPart)",
-          "type": "number",
-          "minimum": 0
-        },
-        "chapter": {
-          "description": "The chapter number (abtChapter)",
-          "type": "number",
-          "minimum": 0
-        },
-        "title": {
-          "description": "The title (abtTitle)",
-          "type": "string"
-        },
-        "audiobookID": {
-          "description": "The audiobook ID (abtAudiobookID)",
-          "type": "string"
-        },
-        "duration": {
-          "description": "The duration (abtDuration)",
-          "type": "number",
-          "minimum": 0
-        },
-        "startOffset": {
-          "description": "The startOffset (abtStartOffset)",
-          "type": "number",
-          "minimum": 0
-        },
-        "time": {
-          "description": "The time (abtTime)",
-          "type": "number",
-          "minimum": 0
-        }
-      },
-      "required": [
-        "@type",
-        "part",
-        "chapter",
-		"title",
-		"audiobookID",
-		"duration",
-        "time"
-      ]
-    }
-  ]
-}
 ```
 
 A [LocatorHrefProgression](#locatorhrefprogression) value MUST be serialized
@@ -495,6 +365,33 @@ An example of a valid, serialized locator is given in [valid-locator-4.json](val
   "duration": 190000,
   "startOffset": 15000,
   "time": 78000
+}
+```
+
+An example of a valid, serialized locator is given in [valid-locator-5.json](valid-locator-5.json):
+
+```json
+{
+  "@type": "LocatorAudioBookTime",
+  "@version": 1,
+  "part": 3,
+  "chapter": 32,
+  "title": "Chapter title",
+  "audiobookID": "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+  "duration": 190000,
+  "startOffset": 15000,
+  "time": 78000
+}
+```
+
+An example of a valid, serialized locator is given in [valid-locator-6.json](valid-locator-6.json):
+
+```json
+{
+  "@type": "LocatorAudioBookTime",
+  "@version": 2,
+  "readingOrderItem" : "urn:org.thepalaceproject:readingOrderItem:23",
+  "readingOrderItemOffsetMilliseconds" : 25000
 }
 ```
 
@@ -675,6 +572,9 @@ their required interpretation is listed below.
 |[invalid-locator-4.json](invalid-locator-4.json)|locator|❌ failure|Chapter progression is greater than 1.0|
 |[invalid-locator-5.json](invalid-locator-5.json)|locator|❌ failure|Chapter number is negative|
 |[invalid-locator-6.json](invalid-locator-6.json)|locator|❌ failure|Page number is negative|
+|[invalid-locator-7.json](invalid-locator-7.json)|locator|❌ failure|Missing @version|
+|[invalid-locator-8.json](invalid-locator-8.json)|locator|❌ failure|Missing readingOrderItem|
+|[invalid-locator-9.json](invalid-locator-9.json)|locator|❌ failure|Missing readingOrderItemOffsetMilliseconds|
 |[valid-bookmark-0.json](valid-bookmark-0.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-1.json](valid-bookmark-1.json)|bookmark|✅ success|Valid bookmark|
 |[valid-bookmark-2.json](valid-bookmark-2.json)|bookmark|✅ success|Valid bookmark|
@@ -687,6 +587,8 @@ their required interpretation is listed below.
 |[valid-locator-2.json](valid-locator-2.json)|locator|✅ success|Valid locator|
 |[valid-locator-3.json](valid-locator-3.json)|locator|✅ success|Valid locator|
 |[valid-locator-4.json](valid-locator-4.json)|locator|✅ success|Valid locator|
+|[valid-locator-5.json](valid-locator-5.json)|locator|✅ success|Valid locator|
+|[valid-locator-6.json](valid-locator-6.json)|locator|✅ success|Valid locator|
 
 ### valid-bookmark-0.json
 
@@ -783,19 +685,20 @@ validBookmark4 :: Bookmark
 validBookmark4 = Bookmark {
   bookmarkId   = Just "urn:uuid:715885bc-23d3-4d7d-bd87-f5e7a042c4ba",
   bookmarkBody = BookmarkBody {
-	bodyChapter	 = "Chapter title",
     bodyDeviceId = "urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c",
-    bodyTime     = "2022-06-27T12:47:49Z"
+    bodyTime     = "2022-06-27T12:47:49Z",
+    bodyOthers   = DM.singleton "http://librarysimplified.org/terms/chapter" "Chapter title"
   },
   bookmarkMotivation = Bookmarking,
   bookmarkTarget = BookmarkTarget {
-    targetLocator = L_ABT $ LocatorAudioBookTime {
-      hpTitle	           = "Chapter title",
-      hpAudiobookID		   = "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
-      hpChapter	           = chapter 32,
-      hpDuration	       = duration 190000,
-      hpTime	           = time 78000,
-      hpPart	           = part 3
+    targetLocator = L_AudioBookTime $ LABT1 $ LocatorAudioBookTime1 {
+      abtTitle        = "Chapter title",
+      abtAudiobookID  = AudiobookID "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+      abtChapter      = chapter 32,
+      abtDuration     = time 190000,
+      abtTime         = time 78000,
+      abtPart         = part 3,
+      abtStartOffset  = time 0
     },
     targetSource = "urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0"
   }
@@ -810,12 +713,13 @@ validBookmark5 = Bookmark {
   bookmarkId   = Just "urn:uuid:715885bc-23d3-4d7d-bd87-f5e7a042c4ba",
   bookmarkBody = BookmarkBody {
     bodyDeviceId = "urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c",
-    bodyTime     = "2022-08-05T16:32:49Z"
+    bodyTime     = "2022-08-05T16:32:49Z",
+    bodyOthers   = DM.empty
   },
   bookmarkMotivation = Bookmarking,
   bookmarkTarget = BookmarkTarget {
-    targetLocator = L_P $ LocatorPage {
-      hpPage	           = page 2
+    targetLocator = L_Page $ LocatorPage {
+      ipPage = page 2
     },
     targetSource = "urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0"
   }
@@ -829,20 +733,20 @@ validBookmark6 :: Bookmark
 validBookmark6 = Bookmark {
   bookmarkId   = Just "urn:uuid:715885bc-23d3-4d7d-bd87-f5e7a042c4ba",
   bookmarkBody = BookmarkBody {
-	bodyChapter	 = "Chapter title",
     bodyDeviceId = "urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c",
-    bodyTime     = "2022-06-27T12:47:49Z"
+    bodyTime     = "2022-06-27T12:47:49Z",
+    bodyOthers   = DM.singleton "http://librarysimplified.org/terms/chapter" "Chapter title"
   },
   bookmarkMotivation = Bookmarking,
   bookmarkTarget = BookmarkTarget {
-    targetLocator = L_ABT $ LocatorAudioBookTime {
-      hpTitle	           = "Chapter title",
-      hpAudiobookID		   = "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
-      hpChapter	           = chapter 32,
-      hpDuration	       = duration 190000,
-      hpStartOffset        = startOffset 15000,
-      hpTime	           = time 78000,
-      hpPart	           = part 3
+    targetLocator = L_AudioBookTime $ LABT1 $ LocatorAudioBookTime1 {
+      abtTitle             = "Chapter title",
+      abtAudiobookID       = AudiobookID "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+      abtChapter           = chapter 32,
+      abtDuration          = time 190000,
+      abtStartOffset       = time 15000,
+      abtTime              = time 78000,
+      abtPart              = part 3
     },
     targetSource = "urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0"
   }
@@ -874,8 +778,8 @@ validLocator1 = L_CFI $ LocatorLegacyCFI {
 
 ```haskell
 validLocator2 :: Locator
-validLocator2 = L_P $ LocatorPage {
-  lcPage			   = Just $ page 2
+validLocator2 = L_Page $ LocatorPage {
+  ipPage = page 2
 }
 ```
 
@@ -883,13 +787,14 @@ validLocator2 = L_P $ LocatorPage {
 
 ```haskell
 validLocator3 :: Locator
-validLocator3 = L_ABT$ LocatorAudioBookTime {
-  lcPart               = Just $ part 3,
-  lcChapter 		   = Just $ chapter 32,
-  lcTitle			   = Just "Chapter title",
-  lcAudiobookID		   = Just "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
-  lcDuration		   = Just $ duration 190000,
-  lcTime			   = Just $ time 78000
+validLocator3 = L_AudioBookTime $ LABT1 $ LocatorAudioBookTime1 {
+  abtPart        = part 3,
+  abtChapter     = chapter 32,
+  abtTitle       = "Chapter title",
+  abtAudiobookID = AudiobookID "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+  abtDuration    = time 190000,
+  abtTime        = time 78000,
+  abtStartOffset = time 0
 }
 ```
 
@@ -897,12 +802,12 @@ validLocator3 = L_ABT$ LocatorAudioBookTime {
 
 ```haskell
 validLocator4 :: Locator
-validLocator4 = L_ABT$ LocatorAudioBookTime {
-  lcPart               = Just $ part 3,
-  lcChapter 		   = Just $ chapter 32,
-  lcTitle			   = Just "Chapter title",
-  lcAudiobookID		   = Just "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
-  lcDuration		   = Just $ duration 190000,
-  lcStartOffset		   = Just $ time 15000,
-  lcTime			   = Just $ time 78000
+validLocator4 = L_AudioBookTime $ LABT1 $ LocatorAudioBookTime1 {
+  abtPart          = part 3,
+  abtChapter       = chapter 32,
+  abtTitle         = "Chapter title",
+  abtAudiobookID   = AudiobookID "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+  abtDuration      = time 190000,
+  abtStartOffset   = time 15000,
+  abtTime          = time 78000
 }

@@ -1,0 +1,11 @@
+{
+  "@type": "LocatorAudioBookTime",
+  "@version": 1,
+  "part": 3,
+  "chapter": 32,
+  "title": "Chapter title",
+  "audiobookID": "urn:uuid:b309844e-7d4e-403e-945b-fbc78acd5e03",
+  "duration": 190000,
+  "startOffset": 15000,
+  "time": 78000
+}
