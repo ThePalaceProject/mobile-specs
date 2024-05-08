@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:org.librarysimplified.bookmarks:locator:1.0",
-  "title": "Simplified Bookmark Locator",
+  "$id": "urn:org.thepalaceproject.bookmarks:locator:2.0",
+  "title": "Palace Bookmark Locator",
   "description": "A bookmark locator",
   "type": "object",
   "oneOf": [
@@ -67,6 +67,11 @@
           "type": "string",
           "pattern": "LocatorAudioBookTime"
         },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "const": 1
+        },
         "chapter": {
           "description": "The number of the chapter (abtChapter)",
           "type": "number"
@@ -90,7 +95,7 @@
         "duration": {
           "description": "The duration of the chapter (abtDuration)",
           "type": "number"
-        },
+        }
       },
       "required": [
         "@type",
@@ -100,6 +105,36 @@
 		"title",
 		"audiobookID",
 		"duration"
+      ]
+    },
+
+    {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorAudioBookTime"
+        },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "const": 2
+        },
+        "readingOrderItem": {
+          "description": "The reading order item within the book.",
+          "type": "string"
+        },
+        "readingOrderItemOffsetMilliseconds": {
+          "description": "The offset from the start of the reading order item within the book.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "@type",
+        "@version",
+        "readingOrderItem",
+        "readingOrderItemOffsetMilliseconds"
       ]
     }
   ]

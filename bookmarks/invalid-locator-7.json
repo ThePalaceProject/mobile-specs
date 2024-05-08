@@ -1,0 +1,5 @@
+{
+  "@type": "LocatorAudioBookTime",
+  "readingOrderItem" : "urn:org.thepalaceproject:readingOrderItem:23",
+  "readingOrderItemOffsetMilliseconds" : 25000
+}
