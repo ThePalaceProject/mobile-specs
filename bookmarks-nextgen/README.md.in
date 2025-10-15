@@ -194,7 +194,9 @@ formats tend to experiment with different ways to express position information
 over time, and therefore _locators_ need a degree of extensibility that the
 rest of the bookmark does not. We therefore require all locators to carry an
 explicit type, and an explicit version number to indicate against which schema
-structures they are expected to validate.
+structures they are expected to validate. In our experience, locator types
+come and go fairly frequently, so the extra complexity of being able to
+separately version them from the schema itself is justified.
 
 ### Metadata
 

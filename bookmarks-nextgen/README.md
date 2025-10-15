@@ -182,7 +182,8 @@ and _versioned_.
     "@version" : {
       "description" : "The version of the locator format",
       "type" : "number",
-      "const" : 1
+      "minimum" : 1,
+      "exclusiveMaximum" : 2
     },
     "href" : {
       "description" : "The unique identifier for a chapter.",
@@ -225,7 +226,8 @@ An example locator is as follows:
     "@version" : {
       "description" : "The version of the locator format",
       "type" : "number",
-      "const" : 1
+      "minimum" : 1,
+      "exclusiveMaximum" : 2
     },
     "readingOrderItem" : {
       "description" : "The reading order item within the book.",
@@ -264,7 +266,8 @@ An example locator is as follows:
     "@version" : {
       "description" : "The version of the locator format",
       "type" : "number",
-      "const" : 1
+      "minimum" : 1,
+      "exclusiveMaximum" : 2
     },
     "page" : {
       "description" : "The page number within the book.",
@@ -294,7 +297,9 @@ formats tend to experiment with different ways to express position information
 over time, and therefore _locators_ need a degree of extensibility that the
 rest of the bookmark does not. We therefore require all locators to carry an
 explicit type, and an explicit version number to indicate against which schema
-structures they are expected to validate.
+structures they are expected to validate. In our experience, locator types
+come and go fairly frequently, so the extra complexity of being able to
+separately version them from the schema itself is justified.
 
 ### Metadata
 
@@ -439,6 +444,9 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         },
         "locator" : {
           "$ref" : "#/$defs/Locator"
+        },
+        "metadata" : {
+          "$ref" : "#/$defs/Metadata"
         }
       },
       "additionalProperties" : false,
@@ -502,7 +510,8 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "@version" : {
           "description" : "The version of the locator format",
           "type" : "number",
-          "const" : 1
+          "minimum" : 1,
+          "exclusiveMaximum" : 2
         },
         "href" : {
           "description" : "The unique identifier for a chapter.",
@@ -529,7 +538,8 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "@version" : {
           "description" : "The version of the locator format",
           "type" : "number",
-          "const" : 1
+          "minimum" : 1,
+          "exclusiveMaximum" : 2
         },
         "readingOrderItem" : {
           "description" : "The reading order item within the book.",
@@ -554,7 +564,8 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "@version" : {
           "description" : "The version of the locator format",
           "type" : "number",
-          "const" : 1
+          "minimum" : 1,
+          "exclusiveMaximum" : 2
         },
         "page" : {
           "description" : "The page number within the book.",
