@@ -130,6 +130,9 @@ bookmark. If, for example, the Palace Circulation manager receives a bookmark
 from a device and inserts new metadata into it, then it *MUST* leave the
 _device identifier_ untouched.
 
+Applications should create a persistent _device identifier_ on installation
+and re-use it for as long as possible.
+
 #### Rationale
 
 The intended use for the _device identifier_ is to allow users to be told
