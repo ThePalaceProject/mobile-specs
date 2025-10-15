@@ -348,7 +348,7 @@ in which the bookmark appears.
 
 A _bookmark list_ is a document that provides a list of _bookmarks_.
 
-The `%schema` property *MUST* be present and must be set to a value of
+The `%schema` property *MUST* be present and *MUST* be set to a value of
 `urn:org.thepalaceproject.bookmarks:2.0`.
 
 The `bookmarks` property contains a possibly-empty list of [bookmarks](#bookmarks).
