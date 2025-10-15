@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:org.thepalaceproject.bookmarks:2.0",
+  "title": "Palace Project Bookmarks 2.0",
+  "description": "A schema and API for electronic publication bookmarks",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Bookmark"
+    },
+    {
+      "$ref": "#/$defs/BookmarkList"
+    }
+  ],
+  "$defs": {
+    "BookmarkList": {
+      "type": "object",
+      "properties": {
+        "%schema": {
+          "description": "The schema identifier for the document.",
+          "type": "string",
+          "const": "urn:org.thepalaceproject.bookmarks:2.0"
+        },
+        "bookmarks": {
+          "description": "The set of applicable bookmarks.",
+          "type": "array",
+          "properties": {
+            "$ref": "#/$defs/Bookmark"
+          }
+        },
+        "bookmarksNext": {
+          "description": "A link to the next page of bookmarks.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "%schema",
+        "bookmarks"
+      ]
+    },
+    "Bookmark": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/$defs/DeviceIdentifier"
+        },
+        "id": {
+          "description": "A unique identifier for a bookmark.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "bookId": {
+          "description": "A unique identifier for a book.",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/Locator"
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "device",
+        "id",
+        "bookId",
+        "locator"
+      ]
+    },
+    "Metadata": {
+      "description": "Optional metadata for a bookmark.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "creationTime": {
+          "description": "The creation time of a bookmark.",
+          "type": "string",
+          "pattern": "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
+        },
+        "chapterTitle": {
+          "description": "The title of the chapter in which the bookmark appears.",
+          "type": "string"
+        }
+      }
+    },
+    "DeviceIdentifier": {
+      "description": "A unique identifier for a device.",
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "description": "A unique identifier for a device.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "deviceName": {
+          "description": "A human-readable name for the device.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "deviceId",
+        "deviceName"
+      ]
+    },
+    "BookmarkIdentifier": {
+      "description": "A unique identifier for a bookmark.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "Locator": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LocatorHrefProgression1"
+        },
+        {
+          "$ref": "#/$defs/LocatorAudioBookTime1"
+        },
+        {
+          "$ref": "#/$defs/LocatorIntegerPage1"
+        }
+      ]
+    },
+    "LocatorHrefProgression1": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator.",
+          "type": "string",
+          "pattern": "LocatorHrefProgression"
+        },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "minimum": 1,
+          "exclusiveMaximum": 2
+        },
+        "href": {
+          "description": "The unique identifier for a chapter.",
+          "type": "string"
+        },
+        "progressWithinChapter": {
+          "description": "The progress within a chapter.",
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "@type",
+        "@version",
+        "href",
+        "progressWithinChapter"
+      ]
+    },
+    "LocatorAudioBookTime1": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorAudioBookTime"
+        },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "minimum": 1,
+          "exclusiveMaximum": 2
+        },
+        "readingOrderItem": {
+          "description": "The reading order item within the book.",
+          "type": "string"
+        },
+        "readingOrderItemOffsetMilliseconds": {
+          "description": "The offset from the start of the reading order item within the book.",
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "@type",
+        "@version",
+        "readingOrderItem",
+        "readingOrderItemOffsetMilliseconds"
+      ]
+    },
+    "LocatorIntegerPage1": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "description": "The type of locator",
+          "type": "string",
+          "pattern": "LocatorIntegerPage"
+        },
+        "@version": {
+          "description": "The version of the locator format",
+          "type": "number",
+          "minimum": 1,
+          "exclusiveMaximum": 2
+        },
+        "page": {
+          "description": "The page number within the book.",
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "@type",
+        "@version",
+        "page"
+      ]
+    }
+  }
+}
