@@ -543,6 +543,9 @@ the next page of bookmarks.
 
 ## Specification Evolution
 
+This section is _informative_. It describes how changes to the specification
+*SHOULD* be made based on changes to requirements.
+
 ### "I need a new version of an existing locator type"
 
 Create a new locator type with a `@type` that matches the existing locator,
