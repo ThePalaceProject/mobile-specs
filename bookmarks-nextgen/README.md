@@ -142,10 +142,8 @@ An example device identifier is as follows:
 
 ```json
 {
-  "device": {
-    "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
-    "deviceName": "Alice's Lenovo Yoga Book"
-  }
+  "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
+  "deviceName": "Alice's Lenovo Yoga Book"
 }
 ```
 
