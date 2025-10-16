@@ -1,6 +1,9 @@
 API
 ===
 
+Note: We should likely version this API such that the paths are `/v1/bookmarks`
+or some equivalent.
+
 ## /bookmarks (GET)
 
 Calling `/bookmarks` with a `GET` request will return a `BookmarkList`.
