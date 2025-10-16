@@ -343,6 +343,29 @@ properties they want into the object. However, applications *MUST* continue
 to function correctly if the _metadata_ object is entirely removed from the
 bookmark.
 
+```json
+{
+  "description" : "Optional metadata for a bookmark.",
+  "type" : "object",
+  "additionalProperties" : true,
+  "properties" : {
+    "creationTime" : {
+      "description" : "The creation time of a bookmark.",
+      "type" : "string",
+      "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
+    },
+    "chapterTitle" : {
+      "description" : "The title of the chapter in which the bookmark appears.",
+      "type" : "string"
+    },
+    "bookTitle" : {
+      "description" : "The title of the book in which the bookmark appears.",
+      "type" : "string"
+    }
+  }
+}
+```
+
 #### CreationTime
 
 The `creationTime` property, if present, provides a full 

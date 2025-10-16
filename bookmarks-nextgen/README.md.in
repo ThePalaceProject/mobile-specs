@@ -238,6 +238,8 @@ properties they want into the object. However, applications *MUST* continue
 to function correctly if the _metadata_ object is entirely removed from the
 bookmark.
 
+%schema-object Metadata
+
 #### CreationTime
 
 The `creationTime` property, if present, provides a full 
