@@ -69,6 +69,9 @@
         "locator": {
           "$ref": "#/$defs/Locator"
         },
+        "role": {
+          "$ref": "#/$defs/Role1"
+        },
         "metadata": {
           "$ref": "#/$defs/Metadata"
         }
@@ -79,6 +82,7 @@
         "device",
         "id",
         "bookId",
+        "role",
         "locator"
       ]
     },
@@ -120,6 +124,14 @@
       "required": [
         "deviceId",
         "deviceName"
+      ]
+    },
+    "Role1": {
+      "description": "A bookmark role.",
+      "type": "string",
+      "enum": [
+        "LAST_READ",
+        "EXPLICIT"
       ]
     },
     "BookmarkIdentifier": {

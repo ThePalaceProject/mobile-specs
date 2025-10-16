@@ -13,15 +13,15 @@ system that matches the needs of the applications as they currently stand.
 New features are mostly out-of-scope; the purpose of this specification is to
 provide a system that largely does what the existing system already does, but
 without the years of technical debt and design flaws that are hindering
-further development. The intention is also to define the specification in a 
+further development. The intention is also to define the specification in a
 manner that allows for future expansion.
 
 ## Design
 
 The formats and APIs defined here are _strict_ and _versioned_ in order to
 allow for safe evolution. The existing system that we are replacing
-is _unversioned_ and _permissive_, which has resulted in each of the 
-applications speaking their own dialect (meaning disjoint subsets of information 
+is _unversioned_ and _permissive_, which has resulted in each of the
+applications speaking their own dialect (meaning disjoint subsets of information
 that each considers _mandatory_), and no safe way to evolve the formats without
 breaking clients.
 
@@ -40,10 +40,10 @@ implicitly dependent on their own _optional_ information, and break when
 bookmarks produced by other applications do not contain that supposedly
 _optional_ information.
 
-Additionally, schema definitions, once published, are immutable and *MUST NOT* 
-be changed. If, for example, the application sprouts new functionality that 
-requires more mandatory information to be placed into a [locator](#locator), 
-a new _version_ of the given locator type should be added to the schema with 
+Additionally, schema definitions, once published, are immutable and *MUST NOT*
+be changed. If, for example, the application sprouts new functionality that
+requires more mandatory information to be placed into a [locator](#locator),
+a new _version_ of the given locator type should be added to the schema with
 an incremented version number, and the old version(s) *MUST* be left unchanged.
 
 The types and formats here are described by a [JSON schema](https://json-schema.org/draft/2020-12).
@@ -72,6 +72,7 @@ A version 1 _bookmark_ consists of:
   * A mandatory [book identifier](#book-identifier).
   * A mandatory [device identifier](#deviceidentifier1).
   * A mandatory [locator](#locator).
+  * A mandatory [role](#role)
   * A set of optional [descriptive metadata](#metadata).
 
 An example bookmark is as follows:
@@ -91,6 +92,7 @@ An example bookmark is as follows:
     "href": "page2.xhtml",
     "progressWithinChapter": 0.58
   },
+  "role": "LAST_READ",
   "metadata": {
     "creationTime": "2025-10-15T16:30:04+00:00",
     "chapterTitle": "How To Read This Book"
@@ -125,12 +127,15 @@ The complete schema for a `Bookmark1` object is as follows:
     "locator" : {
       "$ref" : "#/$defs/Locator"
     },
+    "role" : {
+      "$ref" : "#/$defs/Role1"
+    },
     "metadata" : {
       "$ref" : "#/$defs/Metadata"
     }
   },
   "additionalProperties" : false,
-  "required" : [ "@version", "device", "id", "bookId", "locator" ]
+  "required" : [ "@version", "device", "id", "bookId", "role", "locator" ]
 }
 ```
 
@@ -143,7 +148,7 @@ Any change to the `@version` property represents an incompatible change.
 ### Identifier
 
 Each _bookmark_ is assigned a _unique identifier_ upon creation. The
-_unique identifier_ takes the form of an 
+_unique identifier_ takes the form of an
 [RFC 9562 UUID](https://www.rfc-editor.org/rfc/rfc9562.html).
 
 ```json
@@ -166,7 +171,7 @@ therefore, have to hash the entire contents of the bookmarks if they want to
 provide any kind of stable "handle" to allow for modifying and/or deleting
 bookmarks.
 
-Additionally, bookmarks that have been received on a device from the server 
+Additionally, bookmarks that have been received on a device from the server
 have to be laboriously compared field-by-field to determine if they are "the
 same" as any local bookmarks.
 
@@ -227,9 +232,28 @@ information directly), and *MAY* allow users to set their own device names.
 The intended use for the _device identifier_ is to allow users to be told
 which device created which bookmark. For example, a user might start reading
 a book on one device `X`, and then later switch to device `Y` to continue
-reading. The user can look in their list of bookmarks and see that a bookmark 
+reading. The user can look in their list of bookmarks and see that a bookmark
 exists for a particular time period that was created by device `X`. They can
 then select this bookmark and continue from where they left off on device `X`.
+
+### Role
+
+The _role_ of a bookmark describes _why_ the bookmark was created.
+
+```json
+{
+  "description" : "A bookmark role.",
+  "type" : "string",
+  "enum" : [ "LAST_READ", "EXPLICIT" ]
+}
+```
+
+The `LAST_READ` role indicates that this is the most recent position at which
+the user has been reading in a book. There is expected to be at most one
+bookmark per device per book with a `LAST_READ` role.
+
+The `EXPLICIT` role indicates that this is a manually/explicitly created
+bookmark.
 
 ### Locator
 
@@ -396,11 +420,11 @@ An example locator is as follows:
 
 #### Rationale
 
-Different types of books have different requirements on position information. 
-For example, audiobooks tend to have their positions expressed in terms of an 
-audio file name and an offset in milliseconds. In contrast, PDF files tend to 
-work solely in terms of integer page numbers. Reading systems for individual 
-formats tend to experiment with different ways to express position information 
+Different types of books have different requirements on position information.
+For example, audiobooks tend to have their positions expressed in terms of an
+audio file name and an offset in milliseconds. In contrast, PDF files tend to
+work solely in terms of integer page numbers. Reading systems for individual
+formats tend to experiment with different ways to express position information
 over time, and therefore _locators_ need a degree of extensibility that the
 rest of the bookmark does not. We therefore require all locators to carry an
 explicit type, and an explicit version number to indicate against which schema
@@ -444,7 +468,7 @@ values at all, and are permitted to strip all metadata values from bookmarks.
 
 #### CreationTime
 
-The `creationTime` property, if present, provides a full 
+The `creationTime` property, if present, provides a full
 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) timestamp indicating the
 time and date on which the bookmark was created. Applications *MUST* include
 full time zone information and *SHOULD* create bookmarks in the `UTC` time
@@ -518,6 +542,7 @@ the next page of bookmarks.
         "href": "page2.xhtml",
         "progressWithinChapter": 0.58
       },
+      "role": "EXPLICIT",
       "metadata": {
         "creationTime": "2025-10-15T16:30:04+00:00",
         "chapterTitle": "How To Read This Book"
@@ -537,6 +562,7 @@ the next page of bookmarks.
         "href": "page2.xhtml",
         "progressWithinChapter": 0.62
       },
+      "role": "EXPLICIT",
       "metadata": {
         "creationTime": "2025-10-15T16:33:04+00:00",
         "chapterTitle": "How To Read This Book"
@@ -577,7 +603,7 @@ It is not necessary update the `@version` number of the schema.
 
 #### Rationale
 
-This specification is defined such that applications should assume that 
+This specification is defined such that applications should assume that
 optional metadata is just that: optional. Applications *MUST* continue to
 work correctly if optional data is missing.
 
@@ -597,7 +623,7 @@ and therefore requires a format version update.
 
 If an existing mandatory value requires new semantics, create a new version of
 the `Bookmark` schema that removes the existing property, add a new property
-with a new name, and an incremented `@version` property. Leave the old 
+with a new name, and an incremented `@version` property. Leave the old
 `Bookmark` schema(s) untouched.
 
 #### Rationale
@@ -674,12 +700,15 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "locator" : {
           "$ref" : "#/$defs/Locator"
         },
+        "role" : {
+          "$ref" : "#/$defs/Role1"
+        },
         "metadata" : {
           "$ref" : "#/$defs/Metadata"
         }
       },
       "additionalProperties" : false,
-      "required" : [ "@version", "device", "id", "bookId", "locator" ]
+      "required" : [ "@version", "device", "id", "bookId", "role", "locator" ]
     },
     "Metadata" : {
       "description" : "Optional metadata for a bookmark.",
@@ -717,6 +746,11 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
       },
       "additionalProperties" : false,
       "required" : [ "deviceId", "deviceName" ]
+    },
+    "Role1" : {
+      "description" : "A bookmark role.",
+      "type" : "string",
+      "enum" : [ "LAST_READ", "EXPLICIT" ]
     },
     "BookmarkIdentifier" : {
       "description" : "A unique identifier for a bookmark.",
