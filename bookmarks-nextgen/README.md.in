@@ -428,6 +428,8 @@ with a new name, and an incremented `@version` property. Leave the old
 
 #### Rationale
 
+If you change the semantics, you should change the name.
+
 See [Overloading vs. Object Technology](https://se.inf.ethz.ch/~meyer/publications/joop/overloading.pdf)
 
 ## Schema
