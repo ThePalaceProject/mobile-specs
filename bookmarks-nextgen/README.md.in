@@ -259,6 +259,20 @@ in which the bookmark appears.
 }
 ```
 
+#### BookTitle
+
+The `bookTitle` property, if present, provides the title of the book
+in which the bookmark appears.
+
+```json
+{
+  "metadata": {
+    "bookTitle": "Elementary Molecular Assembly For The Oblivious (Volume III)"
+  }
+}
+```
+
+
 ## Bookmark Lists
 
 A _bookmark list_ is a document that provides a list of _bookmarks_.

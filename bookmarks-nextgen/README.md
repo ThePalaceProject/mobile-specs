@@ -251,11 +251,13 @@ specification.
     },
     "readingOrderItem" : {
       "description" : "The reading order item within the book.",
-      "type" : "string"
+      "type" : "string",
+      "format" : "uri"
     },
     "readingOrderItemOffsetMilliseconds" : {
       "description" : "The offset from the start of the reading order item within the book.",
-      "type" : "number"
+      "type" : "number",
+      "minimum" : 0
     }
   },
   "additionalProperties" : false,
@@ -362,6 +364,20 @@ in which the bookmark appears.
 }
 ```
 
+#### BookTitle
+
+The `bookTitle` property, if present, provides the title of the book
+in which the bookmark appears.
+
+```json
+{
+  "metadata": {
+    "bookTitle": "Elementary Molecular Assembly For The Oblivious (Volume III)"
+  }
+}
+```
+
+
 ## Bookmark Lists
 
 A _bookmark list_ is a document that provides a list of _bookmarks_.
@@ -442,7 +458,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "%schema" : {
           "description" : "The schema identifier for the document.",
           "type" : "string",
-          "const" : "urn:org.thepalaceproject.bookmarks:2.0"
+          "pattern" : "urn:org.thepalaceproject.bookmarks:2.0"
         },
         "bookmarks" : {
           "description" : "The set of applicable bookmarks.",
@@ -496,6 +512,10 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         },
         "chapterTitle" : {
           "description" : "The title of the chapter in which the bookmark appears.",
+          "type" : "string"
+        },
+        "bookTitle" : {
+          "description" : "The title of the book in which the bookmark appears.",
           "type" : "string"
         }
       }
@@ -575,11 +595,13 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         },
         "readingOrderItem" : {
           "description" : "The reading order item within the book.",
-          "type" : "string"
+          "type" : "string",
+          "format" : "uri"
         },
         "readingOrderItemOffsetMilliseconds" : {
           "description" : "The offset from the start of the reading order item within the book.",
-          "type" : "number"
+          "type" : "number",
+          "minimum" : 0
         }
       },
       "additionalProperties" : false,
