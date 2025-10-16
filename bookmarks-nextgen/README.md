@@ -234,6 +234,18 @@ and _versioned_. When examining a locator within a bookmark, applications
 in order to (unsurprisingly) determine the type and format version prior to
 further use.
 
+```json
+{
+  "oneOf" : [ {
+    "$ref" : "#/$defs/LocatorHrefProgression1"
+  }, {
+    "$ref" : "#/$defs/LocatorAudioBookTime1"
+  }, {
+    "$ref" : "#/$defs/LocatorIntegerPage1"
+  } ]
+}
+```
+
 #### LocatorHrefProgression1
 
 A `LocatorHrefProgression1` object describes a position in a book in terms of
@@ -531,7 +543,21 @@ the next page of bookmarks.
 
 ## Specification Evolution
 
-### "I need a new optional value"
+### "I need a new version of an existing locator type"
+
+Create a new locator type with a `@type` that matches the existing locator,
+and a `@version` number that does not match any existing definition with that
+`@type`. Add the new type to the [Locator](#Locator) schema.
+
+### "I need an entirely new locator type"
+
+Create a new locator type with a `@type` that does not match any existing
+types in the schema. Add the new type to the [Locator](#Locator) schema.
+
+No version number updates are required, as `Locator` types are independently
+versioned within this specification.
+
+### "I need a new optional value in a bookmark"
 
 If an application wants to include optional private data in a bookmark, put
 that information into the [metadata](#metadata) object.
@@ -547,7 +573,7 @@ This specification is defined such that applications should assume that
 optional metadata is just that: optional. Applications *MUST* continue to
 work correctly if optional data is missing.
 
-### "I need a new mandatory value"
+### "I need a new mandatory value in a bookmark"
 
 If a new mandatory value is required in a bookmark, create a new version of
 the `Bookmark` schema with the additional property and an incremented `@version`
@@ -559,7 +585,7 @@ A new mandatory value means that applications must be updated to understand
 and/or preserve the new value. This is an incompatible change to the format
 and therefore requires a format version update.
 
-### "I need to change the meaning of a mandatory value"
+### "I need to change the meaning of a mandatory value in a bookmark"
 
 If an existing mandatory value requires new semantics, create a new version of
 the `Bookmark` schema that removes the existing property, add a new property
