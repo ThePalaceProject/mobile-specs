@@ -138,6 +138,7 @@ The complete schema for a `Bookmark1` object is as follows:
 
 The `@version` property represents the major semantic version of the
 bookmark format. We do not use a separate _minor_ and/or _patch_ version.
+Any change to the `@version` property represents an incompatible change.
 
 ### Identifier
 
