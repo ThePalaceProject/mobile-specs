@@ -33,11 +33,12 @@ useful for display to the user, but a bookmark without a creation date can
 still function as a bookmark.
 
 Applications are permitted to behave differently and make decisions based
-on _mandatory_ information in a bookmark, and *MUST NOT* behave differently 
-or make decisions based on _optional_ information. History has shown that
-applications quickly become implicitly dependent on their own _optional_
-information, and break when bookmarks produced by other applications do not
-contain that supposedly _optional_ information.
+on _mandatory_ information in a bookmark, and *MUST NOT* behave differently
+or make decisions based on _optional_ information. History has shown that,
+in the absence of strict rules around behavior, applications quickly become
+implicitly dependent on their own _optional_ information, and break when
+bookmarks produced by other applications do not contain that supposedly
+_optional_ information.
 
 Additionally, schema definitions, once published, are immutable and *MUST NOT* 
 be changed. If, for example, the application sprouts new functionality that 
