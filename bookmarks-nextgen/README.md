@@ -175,6 +175,12 @@ and _versioned_.
 
 #### LocatorHrefProgression1
 
+A `LocatorHrefProgression1` object describes a position in a book in terms of
+a chapter `href` and a real-valued `progressWithinChapter` offset from the
+start of the chapter. The `progressWithinChapter` offset must be in the range
+`[0, 1]` where `0` means "at the exact start of the chapter" and `1` means
+"at the exact end of the chapter".
+
 ```json
 {
   "type" : "object",
@@ -219,6 +225,15 @@ An example locator is as follows:
 
 #### LocatorAudioBookTime1
 
+A `LocatorAudioBookTime1` object describes a position in a book in terms of
+a `readingOrderItem` URI and a `readingOrderItemOffsetMilliseconds` value
+representing the offset in milliseconds from the start of the reading order
+item.
+
+The `readingOrderItem` *MUST* be a URI conforming to the
+[audiobook-reading-order-ids](https://github.com/ThePalaceProject/mobile-specs/tree/main/audiobook-reading-order-ids)
+specification.
+
 ```json
 {
   "type" : "object",
@@ -258,6 +273,9 @@ An example locator is as follows:
 ```
 
 #### LocatorIntegerPage1
+
+A `LocatorIntegerPage1` object describes a position in a book in terms of a
+single integer page value.
 
 ```json
 {
