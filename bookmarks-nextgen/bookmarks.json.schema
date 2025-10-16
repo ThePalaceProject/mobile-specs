@@ -12,6 +12,13 @@
     }
   ],
   "$defs": {
+    "Bookmark": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Bookmark1"
+        }
+      ]
+    },
     "BookmarkList": {
       "type": "object",
       "properties": {
@@ -38,9 +45,15 @@
         "bookmarks"
       ]
     },
-    "Bookmark": {
+    "Bookmark1": {
       "type": "object",
       "properties": {
+        "@version": {
+          "description": "The version of the bookmark format",
+          "type": "number",
+          "minimum": 1,
+          "exclusiveMaximum": 2
+        },
         "device": {
           "$ref": "#/$defs/DeviceIdentifier"
         },
@@ -62,6 +75,7 @@
       },
       "additionalProperties": false,
       "required": [
+        "@version",
         "device",
         "id",
         "bookId",

@@ -46,10 +46,24 @@ requires more mandatory information to be placed into a [locator](#locator),
 a new _version_ of the given locator type should be added to the schema with 
 an incremented version number, and the old version(s) *MUST* be left unchanged.
 
-## Bookmarks
+## Bookmark
 
-A _bookmark_ consists of:
+A _bookmark_ is a value conforming to one of the bookmark format versions
+in this specification.
 
+```json
+{
+  "oneOf" : [ {
+    "$ref" : "#/$defs/Bookmark1"
+  } ]
+}
+```
+
+## Bookmark1
+
+A version 1 _bookmark_ consists of:
+
+  * A `@version` property set to a value of `1`.
   * A mandatory [unique identifier](#identifier).
   * A mandatory [book identifier](#book-identifier).
   * A mandatory [device identifier](#device-identifier).
@@ -60,6 +74,7 @@ An example bookmark is as follows:
 
 ```json
 {
+  "@version": 1,
   "id": "c20eb00d-1d9a-4bc8-a494-b33593788471",
   "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
   "device": {
@@ -78,6 +93,47 @@ An example bookmark is as follows:
   }
 }
 ```
+
+The complete schema for a `Bookmark1` object is as follows:
+
+```json
+{
+  "type" : "object",
+  "properties" : {
+    "@version" : {
+      "description" : "The version of the bookmark format",
+      "type" : "number",
+      "minimum" : 1,
+      "exclusiveMaximum" : 2
+    },
+    "device" : {
+      "$ref" : "#/$defs/DeviceIdentifier"
+    },
+    "id" : {
+      "description" : "A unique identifier for a bookmark.",
+      "type" : "string",
+      "format" : "uuid"
+    },
+    "bookId" : {
+      "description" : "A unique identifier for a book.",
+      "type" : "string"
+    },
+    "locator" : {
+      "$ref" : "#/$defs/Locator"
+    },
+    "metadata" : {
+      "$ref" : "#/$defs/Metadata"
+    }
+  },
+  "additionalProperties" : false,
+  "required" : [ "@version", "device", "id", "bookId", "locator" ]
+}
+```
+
+### @version
+
+The `@version` property represents the major semantic version of the
+bookmark format. We do not use a separate _minor_ and/or _patch_ version.
 
 ### Identifier
 
@@ -432,6 +488,7 @@ the next page of bookmarks.
   "bookmarksNext": "https://example.com/bookmarks?page=3",
   "bookmarks": [
     {
+      "@version": 1,
       "id": "c20eb00d-1d9a-4bc8-a494-b33593788471",
       "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
       "device": {
@@ -450,6 +507,7 @@ the next page of bookmarks.
       }
     },
     {
+      "@version": 1,
       "id": "1c3228b8-21b7-47c7-b818-a23603e64f67",
       "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
       "device": {
@@ -471,6 +529,47 @@ the next page of bookmarks.
 }
 ```
 
+## Specification Evolution
+
+### "I need a new optional value"
+
+If an application wants to include optional private data in a bookmark, put
+that information into the [metadata](#metadata) object.
+
+If multiple applications agree on the semantics of some new optional data in
+a bookmark, update the [metadata](#metadata) schema with the new definition.
+
+It is not necessary update the `@version` number of the schema.
+
+#### Rationale
+
+This specification is defined such that applications should assume that 
+optional metadata is just that: optional. Applications *MUST* continue to
+work correctly if optional data is missing.
+
+### "I need a new mandatory value"
+
+If a new mandatory value is required in a bookmark, create a new version of
+the `Bookmark` schema with the additional property and an incremented `@version`
+property. Leave the old `Bookmark` schema(s) untouched.
+
+#### Rationale
+
+A new mandatory value means that applications must be updated to understand
+and/or preserve the new value. This is an incompatible change to the format
+and therefore requires a format version update.
+
+### "I need to change the meaning of a mandatory value"
+
+If an existing mandatory value requires new semantics, create a new version of
+the `Bookmark` schema that removes the existing property, add a new property
+with a new name, and an incremented `@version` property. Leave the old 
+`Bookmark` schema(s) untouched.
+
+#### Rationale
+
+See [Overloading vs. Object Technology](https://se.inf.ethz.ch/~meyer/publications/joop/overloading.pdf)
+
 ## Schema
 
 The full bookmark [schema](bookmarks.json.schema) is as follows:
@@ -487,6 +586,11 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
     "$ref" : "#/$defs/BookmarkList"
   } ],
   "$defs" : {
+    "Bookmark" : {
+      "oneOf" : [ {
+        "$ref" : "#/$defs/Bookmark1"
+      } ]
+    },
     "BookmarkList" : {
       "type" : "object",
       "properties" : {
@@ -510,9 +614,15 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
       },
       "required" : [ "%schema", "bookmarks" ]
     },
-    "Bookmark" : {
+    "Bookmark1" : {
       "type" : "object",
       "properties" : {
+        "@version" : {
+          "description" : "The version of the bookmark format",
+          "type" : "number",
+          "minimum" : 1,
+          "exclusiveMaximum" : 2
+        },
         "device" : {
           "$ref" : "#/$defs/DeviceIdentifier"
         },
@@ -533,7 +643,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         }
       },
       "additionalProperties" : false,
-      "required" : [ "device", "id", "bookId", "locator" ]
+      "required" : [ "@version", "device", "id", "bookId", "locator" ]
     },
     "Metadata" : {
       "description" : "Optional metadata for a bookmark.",
