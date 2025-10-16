@@ -173,7 +173,10 @@ then select this bookmark and continue from where they left off on device `X`.
 ### Locator
 
 A _locator_ describes a position within a book. Locators are _typed_
-and _versioned_.
+and _versioned_. When examining a locator within a bookmark, applications
+*MUST* inspect the `@type` and `@version` properties of the locator object
+in order to (unsurprisingly) determine the type and format version prior to
+further use.
 
 #### LocatorHrefProgression1
 
@@ -267,6 +270,8 @@ specification.
 }
 ```
 
+An example locator is as follows:
+
 ```json
 {
   "@type": "LocatorAudioBookTime",
@@ -305,6 +310,8 @@ single integer page value.
   "required" : [ "@type", "@version", "page" ]
 }
 ```
+
+An example locator is as follows:
 
 ```json
 {
