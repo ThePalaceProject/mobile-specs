@@ -341,7 +341,10 @@ Each _bookmark_ can have _optional metadata_. A few properties in the _metadata_
 object are defined, but applications are largely free to place whatever
 properties they want into the object. However, applications *MUST* continue
 to function correctly if the _metadata_ object is entirely removed from the
-bookmark.
+bookmark. Applications *MAY* choose to ignore any and all metadata values,
+including those defined by this specification; applications *MUST* be developed
+under the assumption that other applications may not understand any metadata
+values at all, and are permitted to strip all metadata values from bookmarks.
 
 ```json
 {
