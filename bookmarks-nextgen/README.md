@@ -28,13 +28,16 @@ breaking clients.
 We carefully distinguish _mandatory_ information from _useful but optional_
 information. For example, bookmark [locators](#locator) are _mandatory_
 because, without a locator, a bookmark can't function as a bookmark. However,
-the [creation date](#metadata) of a bookmark is optional information; it is
+the [creation date](#metadata) of a bookmark is _optional_ information; it is
 useful for display to the user, but a bookmark without a creation date can
 still function as a bookmark.
 
 Applications are permitted to behave differently and make decisions based
 on _mandatory_ information in a bookmark, and *MUST NOT* behave differently 
-or make decisions based on _optional_ information.
+or make decisions based on _optional_ information. History has shown that
+applications quickly become implicitly dependent on their own _optional_
+information, and break when bookmarks produced by other applications do not
+contain that supposedly _optional_ information.
 
 Additionally, schema definitions, once published, are immutable and *MUST NOT* 
 be changed. If, for example, the application sprouts new functionality that 
