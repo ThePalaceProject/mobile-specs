@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 public final class Make
 {
@@ -71,8 +72,13 @@ public final class Make
       segments.get(1);
     final var defs =
       schemaObject.get("$defs");
+
+    Objects.requireNonNull(defs, "$defs");
+
     final var object =
       defs.get(objectName);
+
+    Objects.requireNonNull(object, objectName);
 
     System.out.println("```json");
     System.out.println(

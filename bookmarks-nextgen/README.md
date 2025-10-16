@@ -70,7 +70,7 @@ A version 1 _bookmark_ consists of:
   * A `@version` property set to a value of `1`.
   * A mandatory [unique identifier](#identifier).
   * A mandatory [book identifier](#book-identifier).
-  * A mandatory [device identifier](#device-identifier).
+  * A mandatory [device identifier](#deviceidentifier1).
   * A mandatory [locator](#locator).
   * A set of optional [descriptive metadata](#metadata).
 
@@ -111,7 +111,7 @@ The complete schema for a `Bookmark1` object is as follows:
       "exclusiveMaximum" : 2
     },
     "device" : {
-      "$ref" : "#/$defs/DeviceIdentifier"
+      "$ref" : "#/$defs/DeviceIdentifier1"
     },
     "id" : {
       "description" : "A unique identifier for a bookmark.",
@@ -177,7 +177,7 @@ identifies the book with which the bookmark is associated, and can effectively
 have any format. In practice, this book identifier will be the `id` value
 that appears in the OPDS feed entry for the book.
 
-### Device Identifier
+### DeviceIdentifier1
 
 Each _bookmark_ is assigned a _device identifier_ upon creation. The
 _device identifier_ is an object consisting of a UUID value unique to the
@@ -660,7 +660,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
           "exclusiveMaximum" : 2
         },
         "device" : {
-          "$ref" : "#/$defs/DeviceIdentifier"
+          "$ref" : "#/$defs/DeviceIdentifier1"
         },
         "id" : {
           "description" : "A unique identifier for a bookmark.",
@@ -701,7 +701,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         }
       }
     },
-    "DeviceIdentifier" : {
+    "DeviceIdentifier1" : {
       "description" : "A unique identifier for a device.",
       "type" : "object",
       "properties" : {

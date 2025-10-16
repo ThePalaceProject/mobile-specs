@@ -55,7 +55,7 @@
           "exclusiveMaximum": 2
         },
         "device": {
-          "$ref": "#/$defs/DeviceIdentifier"
+          "$ref": "#/$defs/DeviceIdentifier1"
         },
         "id": {
           "description": "A unique identifier for a bookmark.",
@@ -102,7 +102,7 @@
         }
       }
     },
-    "DeviceIdentifier": {
+    "DeviceIdentifier1": {
       "description": "A unique identifier for a device.",
       "type": "object",
       "properties": {
