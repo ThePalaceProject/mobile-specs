@@ -46,6 +46,10 @@ requires more mandatory information to be placed into a [locator](#locator),
 a new _version_ of the given locator type should be added to the schema with 
 an incremented version number, and the old version(s) *MUST* be left unchanged.
 
+The types and formats here are described by a [JSON schema](https://json-schema.org/draft/2020-12).
+If, due to unforseen mistakes, the prose of the specification diverges from the
+schema, the schema should take priority as the source of truth.
+
 ## Bookmark
 
 A _bookmark_ is a value conforming to one of the bookmark format versions
