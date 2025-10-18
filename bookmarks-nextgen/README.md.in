@@ -171,6 +171,13 @@ reading. The user can look in their list of bookmarks and see that a bookmark
 exists for a particular time period that was created by device `X`. They can
 then select this bookmark and continue from where they left off on device `X`.
 
+Additionally, _device identifiers_ allow for unambiguous ownership information
+for bookmarks. A device can know which bookmarks it needs to sync to the server
+based on the _device identifier_ alone. Current applications do not have this
+important information and so redundantly synchronize everything (often leading
+to bookmarks that will not "go away" because some other device keeps sending
+them to the server after a device has deleted them).
+
 ### Role
 
 The _role_ of a bookmark describes _why_ the bookmark was created.
