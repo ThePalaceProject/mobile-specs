@@ -460,7 +460,7 @@ values at all, and are permitted to strip all metadata values from bookmarks.
     "creationTime" : {
       "description" : "The creation time of a bookmark.",
       "type" : "string",
-      "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
+      "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
     },
     "chapterTitle" : {
       "description" : "The title of the chapter in which the bookmark appears.",
@@ -726,7 +726,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "creationTime" : {
           "description" : "The creation time of a bookmark.",
           "type" : "string",
-          "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
+          "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
         },
         "chapterTitle" : {
           "description" : "The title of the chapter in which the bookmark appears.",
