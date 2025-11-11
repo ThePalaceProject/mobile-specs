@@ -30,7 +30,7 @@
         "bookmarks": {
           "description": "The set of applicable bookmarks.",
           "type": "array",
-          "properties": {
+          "items": {
             "$ref": "#/$defs/Bookmark"
           }
         },
