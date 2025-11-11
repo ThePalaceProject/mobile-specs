@@ -407,7 +407,8 @@ single integer page value.
     },
     "page" : {
       "description" : "The page number within the book.",
-      "type" : "number"
+      "type" : "integer",
+      "minimum" : 1
     }
   },
   "additionalProperties" : false,
@@ -671,7 +672,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "bookmarks" : {
           "description" : "The set of applicable bookmarks.",
           "type" : "array",
-          "properties" : {
+          "items" : {
             "$ref" : "#/$defs/Bookmark"
           }
         },
@@ -845,7 +846,8 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         },
         "page" : {
           "description" : "The page number within the book.",
-          "type" : "number"
+          "type" : "integer",
+          "minimum" : 1
         }
       },
       "additionalProperties" : false,

@@ -234,7 +234,8 @@
         },
         "page": {
           "description": "The page number within the book.",
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         }
       },
       "additionalProperties": false,
