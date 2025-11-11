@@ -28,8 +28,8 @@ breaking clients.
 We carefully distinguish _mandatory_ information from _useful but optional_
 information. For example, bookmark [locators](#locator) are _mandatory_
 because, without a locator, a bookmark can't function as a bookmark. However,
-the [creation date](#metadata) of a bookmark is _optional_ information; it is
-useful for display to the user, but a bookmark without a creation date can
+the [chapter title](#metadata) of a bookmark is _optional_ information; it is
+useful for display to the user, but a bookmark without a chapter title can
 still function as a bookmark.
 
 Applications are permitted to behave differently and make decisions based
@@ -47,7 +47,7 @@ a new _version_ of the given locator type should be added to the schema with
 an incremented version number, and the old version(s) *MUST* be left unchanged.
 
 The types and formats here are described by a [JSON schema](https://json-schema.org/draft/2020-12).
-If, due to unforseen mistakes, the prose of the specification diverges from the
+If, due to unforeseen mistakes, the prose of the specification diverges from the
 schema, the schema should take priority as the source of truth.
 
 ## Bookmark
@@ -70,6 +70,7 @@ A version 1 _bookmark_ consists of:
   * A `@version` property set to a value of `1`.
   * A mandatory [unique identifier](#identifier).
   * A mandatory [book identifier](#book-identifier).
+  * A mandatory [creation time](#creation-time).
   * A mandatory [device identifier](#deviceidentifier1).
   * A mandatory [locator](#locator).
   * A mandatory [role](#role)
@@ -82,6 +83,7 @@ An example bookmark is as follows:
   "@version": 1,
   "id": "c20eb00d-1d9a-4bc8-a494-b33593788471",
   "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
+  "creationTime": "2025-10-15T16:30:04+00:00",
   "device": {
     "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
     "deviceName": "Alice's Lenovo Yoga Book"
@@ -92,9 +94,10 @@ An example bookmark is as follows:
     "href": "page2.xhtml",
     "progressWithinChapter": 0.58
   },
-  "role": "LAST_READ",
+  "role": {
+    "@type": "LastRead"
+  },
   "metadata": {
-    "creationTime": "2025-10-15T16:30:04+00:00",
     "chapterTitle": "How To Read This Book"
   }
 }
@@ -130,12 +133,16 @@ The complete schema for a `Bookmark1` object is as follows:
     "role" : {
       "$ref" : "#/$defs/Role1"
     },
+    "creationTime" : {
+      "description" : "The creation time of a bookmark.",
+      "$ref" : "#/$defs/ISO8601Timestamp"
+    },
     "metadata" : {
       "$ref" : "#/$defs/Metadata"
     }
   },
   "additionalProperties" : false,
-  "required" : [ "@version", "device", "id", "bookId", "role", "locator" ]
+  "required" : [ "@version", "bookId", "creationTime", "device", "id", "locator", "role" ]
 }
 ```
 
@@ -181,6 +188,15 @@ Each _bookmark_ has an associated _book identifier_. This is a value that
 identifies the book with which the bookmark is associated, and can effectively
 have any format. In practice, this book identifier will be the `id` value
 that appears in the OPDS feed entry for the book.
+
+### Creation Time
+
+Each _bookmark_ carries a _creation time_. This is a full
+[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) timestamp indicating the
+time and date on which the bookmark was created. Applications *MUST* include
+full time zone information and *SHOULD* create bookmarks in the `UTC` time
+zone. Applications *SHOULD* _display_ bookmark times in the device's current
+time zone.
 
 ### DeviceIdentifier1
 
@@ -249,18 +265,62 @@ The _role_ of a bookmark describes _why_ the bookmark was created.
 
 ```json
 {
-  "description" : "A bookmark role.",
-  "type" : "string",
-  "enum" : [ "LAST_READ", "EXPLICIT" ]
+  "oneOf" : [ {
+    "$ref" : "#/$defs/RoleLastRead1"
+  }, {
+    "$ref" : "#/$defs/RoleExplicit1"
+  } ]
 }
 ```
 
-The `LAST_READ` role indicates that this is the most recent position at which
-the user has been reading in a book. There is expected to be at most one
-bookmark per device per book with a `LAST_READ` role.
+#### Last Read
 
-The `EXPLICIT` role indicates that this is a manually/explicitly created
+The `LastRead` role indicates that this is the most recent position at which
+the user has been reading in a book.
+
+```json
+{
+  "type" : "object",
+  "properties" : {
+    "@type" : {
+      "description" : "The type of bookmark role.",
+      "type" : "string",
+      "const" : "LastRead"
+    },
+    "serverModifiedAt" : {
+      "description" : "The time at which the server modified the bookmark.",
+      "$ref" : "#/$defs/ISO8601Timestamp"
+    },
+    "serverRevision" : {
+      "description" : "The revision of the bookmark on the server.",
+      "type" : "integer",
+      "minimum" : 1
+    }
+  },
+  "additionalProperties" : false,
+  "required" : [ "@type" ]
+}
+```
+
+#### Explicit
+
+The `Explicit` role indicates that this is a manually/explicitly created
 bookmark.
+
+```json
+{
+  "type" : "object",
+  "properties" : {
+    "@type" : {
+      "description" : "The type of bookmark role.",
+      "type" : "string",
+      "const" : "Explicit"
+    }
+  },
+  "additionalProperties" : false,
+  "required" : [ "@type" ]
+}
+```
 
 ### Locator
 
@@ -297,7 +357,7 @@ start of the chapter. The `progressWithinChapter` offset must be in the range
     "@type" : {
       "description" : "The type of locator.",
       "type" : "string",
-      "pattern" : "LocatorHrefProgression"
+      "const" : "LocatorHrefProgression"
     },
     "@version" : {
       "description" : "The version of the locator format",
@@ -350,7 +410,7 @@ specification.
     "@type" : {
       "description" : "The type of locator",
       "type" : "string",
-      "pattern" : "LocatorAudioBookTime"
+      "const" : "LocatorAudioBookTime"
     },
     "@version" : {
       "description" : "The version of the locator format",
@@ -397,7 +457,7 @@ single integer page value.
     "@type" : {
       "description" : "The type of locator",
       "type" : "string",
-      "pattern" : "LocatorIntegerPage"
+      "const" : "LocatorIntegerPage"
     },
     "@version" : {
       "description" : "The version of the locator format",
@@ -446,7 +506,13 @@ Each _bookmark_ can have _optional metadata_. A few properties in the _metadata_
 object are defined, but applications are largely free to place whatever
 properties they want into the object. However, applications *MUST* continue
 to function correctly if the _metadata_ object is entirely removed from the
-bookmark. Applications *MAY* choose to ignore any and all metadata values,
+bookmark. Accordingly, this means that application _behaviour_ is not
+permitted to change based on values in the _metadata_ object; if something
+in the _metadata_ object is important enough that applications will behave
+differently based on its presence, it should _not_ be defined in the
+_metadata_ object.
+
+Applications *MAY* choose to ignore any and all metadata values,
 including those defined by this specification; applications *MUST* be developed
 under the assumption that other applications may not understand any metadata
 values at all, and are permitted to strip all metadata values from bookmarks.
@@ -457,11 +523,6 @@ values at all, and are permitted to strip all metadata values from bookmarks.
   "type" : "object",
   "additionalProperties" : true,
   "properties" : {
-    "creationTime" : {
-      "description" : "The creation time of a bookmark.",
-      "type" : "string",
-      "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
-    },
     "chapterTitle" : {
       "description" : "The title of the chapter in which the bookmark appears.",
       "type" : "string"
@@ -470,23 +531,6 @@ values at all, and are permitted to strip all metadata values from bookmarks.
       "description" : "The title of the book in which the bookmark appears.",
       "type" : "string"
     }
-  }
-}
-```
-
-#### CreationTime
-
-The `creationTime` property, if present, provides a full
-[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) timestamp indicating the
-time and date on which the bookmark was created. Applications *MUST* include
-full time zone information and *SHOULD* create bookmarks in the `UTC` time
-zone. Applications *SHOULD* _display_ bookmark times in the device's current
-time zone.
-
-```json
-{
-  "metadata": {
-    "creationTime": "2025-10-15T17:48:33+00:00"
   }
 }
 ```
@@ -540,6 +584,7 @@ the next page of bookmarks.
       "@version": 1,
       "id": "c20eb00d-1d9a-4bc8-a494-b33593788471",
       "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
+      "creationTime": "2025-10-15T16:30:04+00:00",
       "device": {
         "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
         "deviceName": "Alice's Lenovo Yoga Book"
@@ -550,9 +595,10 @@ the next page of bookmarks.
         "href": "page2.xhtml",
         "progressWithinChapter": 0.58
       },
-      "role": "EXPLICIT",
+      "role": {
+        "@type": "Explicit"
+      },
       "metadata": {
-        "creationTime": "2025-10-15T16:30:04+00:00",
         "chapterTitle": "How To Read This Book"
       }
     },
@@ -560,6 +606,7 @@ the next page of bookmarks.
       "@version": 1,
       "id": "1c3228b8-21b7-47c7-b818-a23603e64f67",
       "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
+      "creationTime": "2025-10-15T16:33:04+00:00",
       "device": {
         "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
         "deviceName": "Alice's Lenovo Yoga Book"
@@ -570,9 +617,10 @@ the next page of bookmarks.
         "href": "page2.xhtml",
         "progressWithinChapter": 0.62
       },
-      "role": "EXPLICIT",
+      "role": {
+        "@type": "Explicit"
+      },
       "metadata": {
-        "creationTime": "2025-10-15T16:33:04+00:00",
         "chapterTitle": "How To Read This Book"
       }
     }
@@ -656,6 +704,10 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
     "$ref" : "#/$defs/BookmarkList"
   } ],
   "$defs" : {
+    "ISO8601Timestamp" : {
+      "type" : "string",
+      "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
+    },
     "Bookmark" : {
       "oneOf" : [ {
         "$ref" : "#/$defs/Bookmark1"
@@ -667,7 +719,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "%schema" : {
           "description" : "The schema identifier for the document.",
           "type" : "string",
-          "pattern" : "urn:org.thepalaceproject.bookmarks:2.0"
+          "const" : "urn:org.thepalaceproject.bookmarks:2.0"
         },
         "bookmarks" : {
           "description" : "The set of applicable bookmarks.",
@@ -711,23 +763,22 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "role" : {
           "$ref" : "#/$defs/Role1"
         },
+        "creationTime" : {
+          "description" : "The creation time of a bookmark.",
+          "$ref" : "#/$defs/ISO8601Timestamp"
+        },
         "metadata" : {
           "$ref" : "#/$defs/Metadata"
         }
       },
       "additionalProperties" : false,
-      "required" : [ "@version", "device", "id", "bookId", "role", "locator" ]
+      "required" : [ "@version", "bookId", "creationTime", "device", "id", "locator", "role" ]
     },
     "Metadata" : {
       "description" : "Optional metadata for a bookmark.",
       "type" : "object",
       "additionalProperties" : true,
       "properties" : {
-        "creationTime" : {
-          "description" : "The creation time of a bookmark.",
-          "type" : "string",
-          "pattern" : "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$"
-        },
         "chapterTitle" : {
           "description" : "The title of the chapter in which the bookmark appears.",
           "type" : "string"
@@ -756,9 +807,44 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
       "required" : [ "deviceId", "deviceName" ]
     },
     "Role1" : {
-      "description" : "A bookmark role.",
-      "type" : "string",
-      "enum" : [ "LAST_READ", "EXPLICIT" ]
+      "oneOf" : [ {
+        "$ref" : "#/$defs/RoleLastRead1"
+      }, {
+        "$ref" : "#/$defs/RoleExplicit1"
+      } ]
+    },
+    "RoleLastRead1" : {
+      "type" : "object",
+      "properties" : {
+        "@type" : {
+          "description" : "The type of bookmark role.",
+          "type" : "string",
+          "const" : "LastRead"
+        },
+        "serverModifiedAt" : {
+          "description" : "The time at which the server modified the bookmark.",
+          "$ref" : "#/$defs/ISO8601Timestamp"
+        },
+        "serverRevision" : {
+          "description" : "The revision of the bookmark on the server.",
+          "type" : "integer",
+          "minimum" : 1
+        }
+      },
+      "additionalProperties" : false,
+      "required" : [ "@type" ]
+    },
+    "RoleExplicit1" : {
+      "type" : "object",
+      "properties" : {
+        "@type" : {
+          "description" : "The type of bookmark role.",
+          "type" : "string",
+          "const" : "Explicit"
+        }
+      },
+      "additionalProperties" : false,
+      "required" : [ "@type" ]
     },
     "BookmarkIdentifier" : {
       "description" : "A unique identifier for a bookmark.",
@@ -780,7 +866,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "@type" : {
           "description" : "The type of locator.",
           "type" : "string",
-          "pattern" : "LocatorHrefProgression"
+          "const" : "LocatorHrefProgression"
         },
         "@version" : {
           "description" : "The version of the locator format",
@@ -808,7 +894,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "@type" : {
           "description" : "The type of locator",
           "type" : "string",
-          "pattern" : "LocatorAudioBookTime"
+          "const" : "LocatorAudioBookTime"
         },
         "@version" : {
           "description" : "The version of the locator format",
@@ -836,7 +922,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         "@type" : {
           "description" : "The type of locator",
           "type" : "string",
-          "pattern" : "LocatorIntegerPage"
+          "const" : "LocatorIntegerPage"
         },
         "@version" : {
           "description" : "The version of the locator format",
