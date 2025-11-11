@@ -1,0 +1,475 @@
+bookmarks-nextgen
+==
+
+## Motivation
+
+At the time of writing (October 2025), the Palace client applications and
+server are using an incredibly complicated bookmark system with poorly-defined
+formats and an API that is not fit for any purpose.
+
+This specification attempts to define a new API and formats for a bookmark
+system that matches the needs of the applications as they currently stand.
+
+New features are mostly out-of-scope; the purpose of this specification is to
+provide a system that largely does what the existing system already does, but
+without the years of technical debt and design flaws that are hindering
+further development. The intention is also to define the specification in a
+manner that allows for future expansion.
+
+## Design
+
+The formats and APIs defined here are _strict_ and _versioned_ in order to
+allow for safe evolution. The existing system that we are replacing
+is _unversioned_ and _permissive_, which has resulted in each of the
+applications speaking their own dialect (meaning disjoint subsets of information
+that each considers _mandatory_), and no safe way to evolve the formats without
+breaking clients.
+
+We carefully distinguish _mandatory_ information from _useful but optional_
+information. For example, bookmark [locators](#locator) are _mandatory_
+because, without a locator, a bookmark can't function as a bookmark. However,
+the [chapter title](#metadata) of a bookmark is _optional_ information; it is
+useful for display to the user, but a bookmark without a chapter title can
+still function as a bookmark.
+
+Applications are permitted to behave differently and make decisions based
+on _mandatory_ information in a bookmark, and *MUST NOT* behave differently
+or make decisions based on _optional_ information. History has shown that,
+in the absence of strict rules around behavior, applications quickly become
+implicitly dependent on their own _optional_ information, and break when
+bookmarks produced by other applications do not contain that supposedly
+_optional_ information.
+
+Additionally, schema definitions, once published, are immutable and *MUST NOT*
+be changed. If, for example, the application sprouts new functionality that
+requires more mandatory information to be placed into a [locator](#locator),
+a new _version_ of the given locator type should be added to the schema with
+an incremented version number, and the old version(s) *MUST* be left unchanged.
+
+The types and formats here are described by a [JSON schema](https://json-schema.org/draft/2020-12).
+If, due to unforeseen mistakes, the prose of the specification diverges from the
+schema, the schema should take priority as the source of truth.
+
+## Bookmark
+
+A _bookmark_ is a value conforming to one of the bookmark format versions
+in this specification.
+
+%schema-object Bookmark
+
+## Bookmark1
+
+A version 1 _bookmark_ consists of:
+
+  * A `@version` property set to a value of `1`.
+  * A mandatory [unique identifier](#identifier).
+  * A mandatory [book identifier](#book-identifier).
+  * A mandatory [creation time](#creation-time).
+  * A mandatory [device identifier](#deviceidentifier1).
+  * A mandatory [locator](#locator).
+  * A mandatory [role](#role)
+  * A set of optional [descriptive metadata](#metadata).
+
+An example bookmark is as follows:
+
+```json
+{
+  "@version": 1,
+  "id": "c20eb00d-1d9a-4bc8-a494-b33593788471",
+  "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
+  "creationTime": "2025-10-15T16:30:04+00:00",
+  "device": {
+    "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
+    "deviceName": "Alice's Lenovo Yoga Book"
+  },
+  "locator": {
+    "@type": "LocatorHrefProgression",
+    "@version": 1,
+    "href": "page2.xhtml",
+    "progressWithinChapter": 0.58
+  },
+  "role": {
+    "@type": "LastRead"
+  },
+  "metadata": {
+    "chapterTitle": "How To Read This Book"
+  }
+}
+```
+
+The complete schema for a `Bookmark1` object is as follows:
+
+%schema-object Bookmark1
+
+### @version
+
+The `@version` property represents the major semantic version of the
+bookmark format. We do not use a separate _minor_ and/or _patch_ version.
+Any change to the `@version` property represents an incompatible change.
+
+### Identifier
+
+Each _bookmark_ is assigned a _unique identifier_ upon creation. The
+_unique identifier_ takes the form of an
+[RFC 9562 UUID](https://www.rfc-editor.org/rfc/rfc9562.html).
+
+%schema-object BookmarkIdentifier
+
+If two _bookmarks_ have the same _unique identifier_ then, regardless of their
+other contents, they are to be treated as _the same bookmark_. It follows that
+the _unique identifier_ of a bookmark cannot be changed; if the identifier is
+changed, the result is a new bookmark.
+
+#### Rationale
+
+In the system we are replacing, bookmarks do not have identifiers. Applications,
+therefore, have to hash the entire contents of the bookmarks if they want to
+provide any kind of stable "handle" to allow for modifying and/or deleting
+bookmarks.
+
+Additionally, bookmarks that have been received on a device from the server
+have to be laboriously compared field-by-field to determine if they are "the
+same" as any local bookmarks.
+
+### Book Identifier
+
+Each _bookmark_ has an associated _book identifier_. This is a value that
+identifies the book with which the bookmark is associated, and can effectively
+have any format. In practice, this book identifier will be the `id` value
+that appears in the OPDS feed entry for the book.
+
+### Creation Time
+
+Each _bookmark_ carries a _creation time_. This is a full
+[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) timestamp indicating the
+time and date on which the bookmark was created. Applications *MUST* include
+full time zone information and *SHOULD* create bookmarks in the `UTC` time
+zone. Applications *SHOULD* _display_ bookmark times in the device's current
+time zone.
+
+### DeviceIdentifier1
+
+Each _bookmark_ is assigned a _device identifier_ upon creation. The
+_device identifier_ is an object consisting of a UUID value unique to the
+device, and a human-readable _device name_.
+
+%schema-object DeviceIdentifier1
+
+An example device identifier is as follows:
+
+```json
+{
+  "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
+  "deviceName": "Alice's Lenovo Yoga Book"
+}
+```
+
+Note that the _device identifier_ records the device that _created_ the
+bookmark. If, for example, the Palace Circulation manager receives a bookmark
+from a device and inserts new metadata into it, then it *MUST* leave the
+_device identifier_ untouched.
+
+Applications *SHOULD* create a persistent _device identifier_ on installation
+and re-use it for as long as possible. Applications *SHOULD* attempt to come
+up with a useful friendly device name (some platforms provide APIs for this
+information directly), and *MAY* allow users to set their own device names.
+
+#### Rationale
+
+The intended use for the _device identifier_ is to allow users to be told
+which device created which bookmark. For example, a user might start reading
+a book on one device `X`, and then later switch to device `Y` to continue
+reading. The user can look in their list of bookmarks and see that a bookmark
+exists for a particular time period that was created by device `X`. They can
+then select this bookmark and continue from where they left off on device `X`.
+
+Additionally, _device identifiers_ allow for unambiguous ownership information
+for bookmarks. A device can know which bookmarks it needs to sync to the server
+based on the _device identifier_ alone. Current applications do not have this
+important information and so redundantly synchronize everything (often leading
+to bookmarks that will not "go away" because some other device keeps sending
+them to the server after a device has deleted them).
+
+### Role
+
+The _role_ of a bookmark describes _why_ the bookmark was created.
+
+%schema-object Role1
+
+#### Last Read
+
+The `LastRead` role indicates that this is the most recent position at which
+the user has been reading in a book.
+
+%schema-object RoleLastRead1
+
+#### Explicit
+
+The `Explicit` role indicates that this is a manually/explicitly created
+bookmark.
+
+%schema-object RoleExplicit1
+
+### Locator
+
+A _locator_ describes a position within a book. Locators are _typed_
+and _versioned_. When examining a locator within a bookmark, applications
+*MUST* inspect the `@type` and `@version` properties of the locator object
+in order to (unsurprisingly) determine the type and format version prior to
+further use.
+
+%schema-object Locator
+
+#### LocatorHrefProgression1
+
+A `LocatorHrefProgression1` object describes a position in a book in terms of
+a chapter `href` and a real-valued `progressWithinChapter` offset from the
+start of the chapter. The `progressWithinChapter` offset must be in the range
+`[0, 1]` where `0` means "at the exact start of the chapter" and `1` means
+"at the exact end of the chapter".
+
+%schema-object LocatorHrefProgression1
+
+An example locator is as follows:
+
+```json
+{
+  "@type": "LocatorHrefProgression",
+  "@version": 1,
+  "href": "/xyz.html",
+  "progressWithinChapter": 0.666
+}
+```
+
+#### LocatorAudioBookTime1
+
+A `LocatorAudioBookTime1` object describes a position in a book in terms of
+a `readingOrderItem` URI and a `readingOrderItemOffsetMilliseconds` value
+representing the offset in milliseconds from the start of the reading order
+item.
+
+The `readingOrderItem` *MUST* be a URI conforming to the
+[audiobook-reading-order-ids](https://github.com/ThePalaceProject/mobile-specs/tree/main/audiobook-reading-order-ids)
+specification.
+
+%schema-object LocatorAudioBookTime1
+
+An example locator is as follows:
+
+```json
+{
+  "@type": "LocatorAudioBookTime",
+  "@version": 1,
+  "readingOrderItem" : "urn:org.thepalaceproject:readingOrderItem:23",
+  "readingOrderItemOffsetMilliseconds" : 25000
+}
+```
+
+#### LocatorIntegerPage1
+
+A `LocatorIntegerPage1` object describes a position in a book in terms of a
+single integer page value.
+
+%schema-object LocatorIntegerPage1
+
+An example locator is as follows:
+
+```json
+{
+  "@type": "LocatorIntegerPage",
+  "@version": 1,
+  "page": 23
+}
+```
+
+#### Rationale
+
+Different types of books have different requirements on position information.
+For example, audiobooks tend to have their positions expressed in terms of an
+audio file name and an offset in milliseconds. In contrast, PDF files tend to
+work solely in terms of integer page numbers. Reading systems for individual
+formats tend to experiment with different ways to express position information
+over time, and therefore _locators_ need a degree of extensibility that the
+rest of the bookmark does not. We therefore require all locators to carry an
+explicit type, and an explicit version number to indicate against which schema
+structures they are expected to validate. In our experience, locator types
+come and go fairly frequently, so the extra complexity of being able to
+separately version them from the schema itself is justified.
+
+### Metadata
+
+Each _bookmark_ can have _optional metadata_. A few properties in the _metadata_
+object are defined, but applications are largely free to place whatever
+properties they want into the object. However, applications *MUST* continue
+to function correctly if the _metadata_ object is entirely removed from the
+bookmark. Accordingly, this means that application _behaviour_ is not
+permitted to change based on values in the _metadata_ object; if something
+in the _metadata_ object is important enough that applications will behave
+differently based on its presence, it should _not_ be defined in the
+_metadata_ object.
+
+Applications *MAY* choose to ignore any and all metadata values,
+including those defined by this specification; applications *MUST* be developed
+under the assumption that other applications may not understand any metadata
+values at all, and are permitted to strip all metadata values from bookmarks.
+
+%schema-object Metadata
+
+#### ChapterTitle
+
+The `chapterTitle` property, if present, provides the title of the chapter
+in which the bookmark appears.
+
+```json
+{
+  "metadata": {
+    "chapterTitle": "How To Read This Book"
+  }
+}
+```
+
+#### BookTitle
+
+The `bookTitle` property, if present, provides the title of the book
+in which the bookmark appears.
+
+```json
+{
+  "metadata": {
+    "bookTitle": "Elementary Molecular Assembly For The Oblivious (Volume III)"
+  }
+}
+```
+
+
+## Bookmark Lists
+
+A _bookmark list_ is a document that provides a list of _bookmarks_.
+
+The `%schema` property *MUST* be present and *MUST* be set to a value of
+`urn:org.thepalaceproject.bookmarks:2.0`.
+
+The `bookmarks` property contains a possibly-empty list of [bookmarks](#bookmarks).
+
+The `bookmarksNext` property allows the producer of the list to support
+pagination; if a `bookmarksNext` property is present, the URI will return
+the next page of bookmarks.
+
+```json
+{
+  "%schema": "urn:org.thepalaceproject.bookmarks:2.0",
+  "bookmarksNext": "https://example.com/bookmarks?page=3",
+  "bookmarks": [
+    {
+      "@version": 1,
+      "id": "c20eb00d-1d9a-4bc8-a494-b33593788471",
+      "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
+      "creationTime": "2025-10-15T16:30:04+00:00",
+      "device": {
+        "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
+        "deviceName": "Alice's Lenovo Yoga Book"
+      },
+      "locator": {
+        "@type": "LocatorHrefProgression",
+        "@version": 1,
+        "href": "page2.xhtml",
+        "progressWithinChapter": 0.58
+      },
+      "role": {
+        "@type": "Explicit"
+      },
+      "metadata": {
+        "chapterTitle": "How To Read This Book"
+      }
+    },
+    {
+      "@version": 1,
+      "id": "1c3228b8-21b7-47c7-b818-a23603e64f67",
+      "bookId": "urn:uuid:15e0b960-649f-4386-a04e-127dd2e9713b",
+      "creationTime": "2025-10-15T16:33:04+00:00",
+      "device": {
+        "deviceId": "c108e1b1-218c-4b5c-a4d3-88b58d5ef49f",
+        "deviceName": "Alice's Lenovo Yoga Book"
+      },
+      "locator": {
+        "@type": "LocatorHrefProgression",
+        "@version": 1,
+        "href": "page2.xhtml",
+        "progressWithinChapter": 0.62
+      },
+      "role": {
+        "@type": "Explicit"
+      },
+      "metadata": {
+        "chapterTitle": "How To Read This Book"
+      }
+    }
+  ]
+}
+```
+
+## Specification Evolution
+
+This section is _informative_. It describes how changes to the specification
+*SHOULD* be made based on changes to requirements.
+
+### "I need a new version of an existing locator type"
+
+Create a new locator type with a `@type` that matches the existing locator,
+and a `@version` number that does not match any existing definition with that
+`@type`. Add the new type to the [Locator](#Locator) schema.
+
+### "I need an entirely new locator type"
+
+Create a new locator type with a `@type` that does not match any existing
+types in the schema. Add the new type to the [Locator](#Locator) schema.
+
+No version number updates are required, as `Locator` types are independently
+versioned within this specification.
+
+### "I need a new optional value in a bookmark"
+
+If an application wants to include optional private data in a bookmark, put
+that information into the [metadata](#metadata) object.
+
+If multiple applications agree on the semantics of some new optional data in
+a bookmark, update the [metadata](#metadata) schema with the new definition.
+
+It is not necessary update the `@version` number of the schema.
+
+#### Rationale
+
+This specification is defined such that applications should assume that
+optional metadata is just that: optional. Applications *MUST* continue to
+work correctly if optional data is missing.
+
+### "I need a new mandatory value in a bookmark"
+
+If a new mandatory value is required in a bookmark, create a new version of
+the `Bookmark` schema with the additional property and an incremented `@version`
+property. Leave the old `Bookmark` schema(s) untouched.
+
+#### Rationale
+
+A new mandatory value means that applications must be updated to understand
+and/or preserve the new value. This is an incompatible change to the format
+and therefore requires a format version update.
+
+### "I need to change the meaning of a mandatory value in a bookmark"
+
+If an existing mandatory value requires new semantics, create a new version of
+the `Bookmark` schema that removes the existing property, add a new property
+with a new name, and an incremented `@version` property. Leave the old
+`Bookmark` schema(s) untouched.
+
+#### Rationale
+
+If you change the semantics, you should change the name.
+
+See [Overloading vs. Object Technology](https://se.inf.ethz.ch/~meyer/publications/joop/overloading.pdf)
+
+## Schema
+
+The full bookmark [schema](bookmarks.json.schema) is as follows:
+
+%schema
