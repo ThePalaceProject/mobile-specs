@@ -257,7 +257,7 @@ An example locator is as follows:
 
 ```json
 {
-  "@type": "LocatorPage",
+  "@type": "LocatorIntegerPage",
   "@version": 1,
   "page": 23
 }
