@@ -365,7 +365,7 @@ specification.
     },
     "readingOrderItemOffsetMilliseconds" : {
       "description" : "The offset from the start of the reading order item within the book.",
-      "type" : "number",
+      "type" : "integer",
       "minimum" : 0
     }
   },
@@ -823,7 +823,7 @@ The full bookmark [schema](bookmarks.json.schema) is as follows:
         },
         "readingOrderItemOffsetMilliseconds" : {
           "description" : "The offset from the start of the reading order item within the book.",
-          "type" : "number",
+          "type" : "integer",
           "minimum" : 0
         }
       },

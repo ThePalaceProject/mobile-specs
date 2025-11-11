@@ -206,7 +206,7 @@
         },
         "readingOrderItemOffsetMilliseconds": {
           "description": "The offset from the start of the reading order item within the book.",
-          "type": "number",
+          "type": "integer",
           "minimum": 0
         }
       },
